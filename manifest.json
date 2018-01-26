@@ -1,0 +1,9 @@
+{
+  "name": "mobileChkout",
+  "author": "Trevor Adams",
+  "version": "0.1.0",
+  "short_name": "mobileChkout",
+  "description": "Web app designed to provide a quicker way of checking out at stores. This application will allow shoppers to ring themselves up using their smartphone as a scanner.",
+  "start_url": "/",
+  "display": "standalone"
+}
