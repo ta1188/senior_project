@@ -1,0 +1,32 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="checkout-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <p>Hello [[prop1]]!</p>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class CheckoutView extends Polymer.Element {
+      static get is() { return 'checkout-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'checkout-view'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(CheckoutView.is, CheckoutView);
+  </script>
+</dom-module>

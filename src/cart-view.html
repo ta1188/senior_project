@@ -1,0 +1,32 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="cart-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <p>Hello [[prop1]]!</p>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class CartView extends Polymer.Element {
+      static get is() { return 'cart-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'cart-view'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(CartView.is, CartView);
+  </script>
+</dom-module>
