@@ -1,7 +1,8 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/home-view.html",
+  "shell": "index.html",
   "fragments": [
+    "src/login-view.html",
     "src/account-view.html",
     "src/cart-view.html",
     "src/checkout-view.html",

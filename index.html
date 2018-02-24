@@ -9,12 +9,75 @@
 
     <!-- See https://goo.gl/OOhYW5 -->
     <link rel="manifest" href="/manifest.json">
+    <link rel="import" href="src/elements.html">
 
     <script src="./bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
-    <link rel="import" href="./src/home-view.html">
+    <link rel="stylesheet" href="assets/styles/main.css">
   </head>
   <body>
-    <home-view></home-view>
+    <template is="dom-bind" id="app">
+
+        <firebase-app
+        auth-domain="mbl-checkout.firebaseapp.com"
+        database-url="https://mbl-checkout.firebaseio.com"
+        api-key="AIzaSyCR-IQgDi--blpDp8j5tSChp5v1efu5rHc"
+        storage-bucket="mbl-checkout.appspot.com"
+        messaging-sender-id="466282548212"></firebase-app>
+        
+      <login-view name="login" 
+                  signed-in="{{signedIn}}" 
+                  hidden="{{user}}" 
+                  user="{{user}}" 
+                  user-ref="{{userRef}}" 
+                  user-info="{{userInfo}}"></login-view>
+
+      <div class="main-content" hidden="{{!app.user}}">
+        <iron-pages selected="{{route}}" attr-for-selected="name" fallback-selection="login" role="main">
+          <section name="account">
+            <account-view signed-in="{{signedIn}}"></account-view>
+          </section>
+          <section name="cart">
+            <cart-view></cart-view>
+          </section>
+          <section name="checkout">
+            <checkout-view></checkout-view>
+          </section>
+          <section name="scanner">
+            <scanner-view></scanner-view>
+          </section>
+          <section name="store">
+            <store-view></store-view>
+          </section>
+          <section name="lists">
+            <lists-view></lists-view>
+          </section>
+          <section name="receipts">
+            <receipts-view></receipts-view>
+          </section>
+        </iron-pages>
+      </div>
+
+      <iron-selector hidden="{{!signedIn}}" selected="[[page]]" attr-for-selected="name" class="nav-bar footer-nav flex-row">
+        <a name="account" href="account">
+          <img src="../assets/account_box_24px.svg" alt="Account" />
+        </a>
+        <a name="store" href="store">
+          <img src="../assets/store_24px.svg" alt="Stores" />
+        </a>
+        <a name="receipts" href="receipts">
+          <img src="../assets/receipt_24px.svg" alt="Receipts Lists" />
+        </a>
+        <a name="lists" href="lists">
+          <img src="../assets/list_24px.svg" alt="Shopping Lists" />
+        </a>
+      </iron-selector>
+      <paper-toast id="toast">
+        <span class="toast-hide-button" role="button" tabindex="0" onclick="app.$.toast.hide()">Ok</span>
+      </paper-toast>
+    </template>
+
+    <script src="assets/scripts/app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
   </body>
 </html>

@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 
 <dom-module id="account-view">
   <template>
@@ -7,7 +8,10 @@
         display: block;
       }
     </style>
+    <firebase-auth id="auth" user="{{user}}" signed-in="{{signedIn}}" on-error="handleError"></firebase-auth>
+
     <p>Hello [[prop1]]!</p>
+    <a href="login" on-click="_signOut">Sign out</a>
   </template>
 
   <script>
@@ -19,11 +23,24 @@
       static get is() { return 'account-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'account-view'
+          signedIn: {
+            type: Boolean,
+            value: true,
+            notify: true
           }
         };
+      }
+
+      _signOut() {
+        console.log('signing out...');
+        debugger;
+        this.$.auth.signOut();
+        console.log('signedIn?', this.signedIn);
+        // this.$.auth.signOut().then(function(){
+        //   this.page = 'login';
+        //   window.history.pushState({}, null, 'login');
+        //   window.dispatchEvent(new CustomEvent ('location-changed'));
+        // }.bind(this));
       }
     }
 

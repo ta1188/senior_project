@@ -1,0 +1,32 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="account-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <p>Hello [[prop1]]!</p>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class AccountView extends Polymer.Element {
+      static get is() { return 'account-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'account-view'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(AccountView.is, AccountView);
+  </script>
+</dom-module>

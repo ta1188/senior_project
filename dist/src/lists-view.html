@@ -1,0 +1,32 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="lists-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <p>Hello [[prop1]]!</p>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class ListsView extends Polymer.Element {
+      static get is() { return 'lists-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'lists-view'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(ListsView.is, ListsView);
+  </script>
+</dom-module>

@@ -4,11 +4,9 @@
   "main": "index.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
-    "page": "visionmedia/page.js#^1.x",
     "app-route": "PolymerElements/app-route#^2.0.3",
     "iron-pages": "PolymerElements/iron-pages#^2.0.1",
-    "polymerfire": "firebase/polymerfire#^2.2.1",
-    "paper-toast": "PolymerElements/paper-toast#^2.x"
+    "polymerfire": "firebase/polymerfire#^2.2.1"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",

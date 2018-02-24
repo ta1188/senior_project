@@ -1,0 +1,214 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<link rel="import" href="./login-view.html">
+<link rel="lazy-import" href="./account-view.html">
+<link rel="lazy-import" href="./cart-view.html">
+<link rel="lazy-import" href="./checkout-view.html">
+<link rel="lazy-import" href="./scanner-view.html">
+<link rel="lazy-import" href="./store-view.html">
+<link rel="lazy-import" href="./receipts-view.html">
+<link rel="lazy-import" href="./lists-view.html">
+<link rel="import" href="./four-oh-four-view.html">
+
+<!-- <link rel="lazy-import" href="./list-view.html">       <- These will be added in the lists component
+<link rel="lazy-import" href="./receipt-view.html"> -->
+
+<dom-module id="home-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font-family: Verdana, Geneva, sans-serif;
+        color: #4F4F4F;
+      }
+      h1, h2, h3, h4 {
+        font-family: Verdana, Geneva, sans-serif;
+        font-weight: normal;
+      }
+      .nav-bar {
+        height: 70px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, rgba(58, 131, 124, 0.8) 0%, rgba(255, 255, 255, 0) 100%), #3A837C;
+      }
+      .header-nav {
+        color: #FFFFFF;
+        text-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+        top: 0;
+        padding: 0 25px; /* Align with left-most footer icon */
+      }
+      .footer-nav {
+        bottom: 0;
+      }
+      .footer-nav img {
+        width: 30px;
+        height: 30px;
+      }
+      .footer-nav a {
+        padding: 0 20px;
+        justify-self: center;
+        align-self: center
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .main-content {
+        padding: 5px 25px;
+        position: absolute;
+        top: 70px;
+        bottom: 70px;
+        left: 0; 
+        right: 0;
+        overflow-x: hidden;
+        overflow-y: scroll;
+      }
+    </style>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+      
+    <login-view hidden$="{{signedIn}}"></login-view>
+    <div class="main-container" hidden$="{{!signedIn}}">
+
+      <div class="nav-bar header-nav">
+        <h2>Hello [[prop1]]!</h2>
+      </div> 
+      
+      <div class="main-content">
+        <!-- iron-pages selects the view based on the active route -->
+        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="four-oh-four">
+          <account-view name="account"></account-view>
+          <cart-view name="cart"></cart-view>
+          <checkout-view name="checkout"></checkout-view>
+          <scanner-view name="scanner"></scanner-view>
+          <store-view name="store"></store-view>
+          <lists-view name="lists"></lists-view>
+          <receipts-view name="receipts"></receipts-view>
+    
+          <view404 name="four-oh-four"></view404>
+        </iron-pages>
+      </div>
+
+      <!-- <iron-selector selected="[[page]]" attr-for-selected="name" role="navigation">
+        <a name="lists" href="lists">Shopping Lists</a>
+        <a name="receipts" href="receipts">Receipts</a>
+        <a name="account" href="account">Account</a>
+        <a name="cart" href="cart">Cart</a>
+        <a name="checkout" href="checkout">Checkout</a>
+        <a name="store" href="store">Store</a>
+        <a name="scanner" href="scanner">Scanner</a>
+      </iron-selector> -->
+  
+      <div class="nav-bar footer-nav flex-row">
+        <a name="account" href="account">
+          <img src="../assets/account_box_24px.svg" alt="Account">
+        </a>
+        <a name="store" href="store">
+          <img src="../assets/store_24px.svg" alt="Stores">
+        </a>
+        <a name="receipts" href="receipts">
+          <img src="../assets/receipt_24px.svg" alt="Receipts Lists">
+        </a>
+        <a name="lists" href="lists">
+          <img src="../assets/list_24px.svg" alt="Shopping Lists">
+        </a>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HomeView extends Polymer.Element {
+      static get is() { return 'home-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'home-view'
+          },
+
+          signedIn: {
+            type: Boolean,
+            value: false
+          },
+
+          user: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+
+          rootPattern: String,
+          routeData: Object,
+          subroute: String
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      // ready() {
+      //   debugger;
+      //   if (!this.signedIn && this.$.auth) {
+      //     this.$.auth.signInWithPopup()
+      //       .then(function(response) { 
+      //         /* optionally handle a successful login */ 
+      //         console.log("response: ", response);
+              
+      //       })
+      //       .catch(function(error) { 
+      //         /* unsuccessful authentication response here */ 
+      //         console.error('error: ', error);
+      //       });
+      //   }
+      // };
+
+      _routePageChanged(page) {
+        // Polymer 2.0 will call with `undefined` on initialization.
+        // Ignore until we are properly called with a string.
+        if (page === undefined)  return;
+
+        // If no page was found in the route data, page will be an empty string.
+        // Deault to 'lists' in that case.
+        this.page = page || 'lists';
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl(page + '-view.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+      }
+
+      _showPage404() {
+        this.page = 'four-oh-four';
+      }
+
+    }
+
+    window.customElements.define(HomeView.is, HomeView);
+  </script>
+</dom-module>

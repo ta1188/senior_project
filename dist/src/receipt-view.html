@@ -1,0 +1,32 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="receipt-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <p>Hello [[prop1]]!</p>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class ReceiptView extends Polymer.Element {
+      static get is() { return 'receipt-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'receipt-view'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(ReceiptView.is, ReceiptView);
+  </script>
+</dom-module>
