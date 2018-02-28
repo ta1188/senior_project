@@ -8,6 +8,7 @@
       }
     </style>
     <p>Hello [[prop1]]!</p>
+    <button on-click="logout">Logout</button>
   </template>
 
   <script>
@@ -24,6 +25,10 @@
             value: 'account-view'
           }
         };
+      }
+      logout(){
+        console.log('logging');
+        document.dispatchEvent(new CustomEvent ('logout'));
       }
     }
 

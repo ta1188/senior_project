@@ -3,14 +3,16 @@
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 
-<link rel="lazy-import" href="./account-view.html">
-<link rel="lazy-import" href="./cart-view.html">
-<link rel="lazy-import" href="./checkout-view.html">
-<link rel="lazy-import" href="./scanner-view.html">
-<link rel="lazy-import" href="./store-view.html">
-<link rel="lazy-import" href="./receipts-view.html">
-<link rel="lazy-import" href="./lists-view.html">
+<link rel="import" href="./login-view.html">
+<link rel="import" href="./account-view.html">
+<link rel="import" href="./cart-view.html">
+<link rel="import" href="./checkout-view.html">
+<link rel="import" href="./scanner-view.html">
+<link rel="import" href="./store-view.html">
+<link rel="import" href="./receipts-view.html">
+<link rel="import" href="./lists-view.html">
 <link rel="import" href="./four-oh-four-view.html">
 
 <!-- <link rel="lazy-import" href="./list-view.html">       <- These will be added in the lists component
@@ -68,20 +70,40 @@
         overflow-x: hidden;
         overflow-y: scroll;
       }
+      .login-view {
+        padding: 0;
+        top: 0;
+        bottom: 0;
+      }
+      .hide {
+        display: none;
+      }
     </style>
-    <app-location route="{{route}}"></app-location>
-    <app-route
-        route="{{route}}"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
+    <firebase-app
+      auth-domain="mbl-checkout.firebaseapp.com"
+      database-url="https://mbl-checkout.firebaseio.com"
+      api-key="AIzaSyCR-IQgDi--blpDp8j5tSChp5v1efu5rHc"
+      storage-bucket="mbl-checkout.appspot.com"
+      messaging-sender-id="466282548212"></firebase-app>
 
-      <div class="nav-bar header-nav">
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/login"></app-route>
+    <app-route route="{{route}}" pattern="/account"></app-route>
+    <app-route route="{{route}}" pattern="/cart"></app-route>
+    <app-route route="{{route}}" pattern="/checkout"></app-route>
+    <app-route route="{{route}}" pattern="/scanner"></app-route>
+    <app-route route="{{route}}" pattern="/store"></app-route>
+    <app-route route="{{route}}" pattern="/lists"></app-route>
+    <app-route route="{{route}}" pattern="/receipts"></app-route>
+    <!-- <app-route route="{{route}}" pattern="/four-oh-four"></app-route> -->
+
+      <div class$="nav-bar header-nav [[_hideOnLogin(page)]]">
         <h2>Hello [[prop1]]!</h2>
       </div> 
-      <div class="main-content">
+      <div class$="main-content [[_isLogin(page)]]">
         <!-- iron-pages selects the view based on the active route -->
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="four-oh-four">
+          <login-view name="login" signedIn="{{signedIn}}"></login-view>
           <account-view name="account"></account-view>
           <cart-view name="cart"></cart-view>
           <checkout-view name="checkout"></checkout-view>
@@ -90,21 +112,11 @@
           <lists-view name="lists"></lists-view>
           <receipts-view name="receipts"></receipts-view>
     
-          <view404 name="four-oh-four"></view404>
+          <four-oh-four-view name="four-oh-four"></four-oh-four-view>
         </iron-pages>
       </div>
 
-    <!-- <iron-selector selected="[[page]]" attr-for-selected="name" role="navigation">
-      <a name="lists" href="lists">Shopping Lists</a>
-      <a name="receipts" href="receipts">Receipts</a>
-      <a name="account" href="account">Account</a>
-      <a name="cart" href="cart">Cart</a>
-      <a name="checkout" href="checkout">Checkout</a>
-      <a name="store" href="store">Store</a>
-      <a name="scanner" href="scanner">Scanner</a>
-    </iron-selector> -->
-
-    <div class="nav-bar footer-nav flex-row">
+    <div class$="nav-bar footer-nav flex-row [[_hideOnLogin(page)]]">
       <a name="account" href="account">
         <img src="../assets/account_box_24px.svg" alt="Account" />
       </a>
@@ -133,13 +145,20 @@
             type: String,
             value: 'home-view'
           },
-
+          signedIn: Boolean,
           page: {
             type: String,
+            value: 'login',
             reflectToAttribute: true,
-            observer: '_pageChanged',
+            observer: '_pageChanged'
           },
-          rootPattern: String,
+          route: {
+            type: Object,
+            value: {
+              path: '/login'
+            },
+            observer: '_routeChanged'
+          },
           routeData: Object,
           subroute: String,
         };
@@ -151,21 +170,25 @@
         ];
       }
 
-      tester() {
-        console.log("here now");
-      };
-
       _routePageChanged(page) {
         // Polymer 2.0 will call with `undefined` on initialization.
         // Ignore until we are properly called with a string.
         if (page === undefined)  return;
 
         // If no page was found in the route data, page will be an empty string.
-        // Deault to 'lists' in that case.
-        this.page = page || 'lists';
+        // Deault to 'store' in that case.
+        this.page = page || 'store';
       }
 
-      _pageChanged(page) {
+      _routeChanged(route) {
+        if (!route.path) return;
+        this.page = route.path;
+      }
+
+      _pageChanged(page){
+        if (!page) return;
+        if (page.substr()[0] === '/') page = page.substr(1);         
+        this.page = window.app.user ? page : 'login';
         // Load page import on demand. Show 404 page if fails
         var resolvedPageUrl = this.resolveUrl(page + '-view.html');
         Polymer.importHref(
@@ -179,8 +202,15 @@
         this.page = 'four-oh-four';
       }
 
+      _hideOnLogin(_page) {
+        // debugger;
+        return (_page === "login") ? 'hide' : '';
+      }
+      _isLogin(_page) {
+        // debugger;
+        return (_page === "login") ? 'login-view' : '';
+      }
     }
-
     window.customElements.define(HomeView.is, HomeView);
   </script>
 </dom-module>

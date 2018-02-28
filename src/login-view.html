@@ -1,0 +1,340 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<dom-module id="login-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        font-size: 0.75rem;                  
+        background: linear-gradient(180deg, rgba(58, 131, 124, 0.8) 0%, rgba(255, 255, 255, 0) 100%), #3A837C;
+      }
+      .welcome-card {
+        margin: 15px;
+        padding: 0 10px;
+        color: #4F4F4F;
+        max-width: 600px;
+        max-height: 800px;
+      }
+      .inputs input {
+        padding: 15px 0;
+        width: 100%;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        color: #fff;
+        text-indent: 35px;
+        border-bottom: 1px solid #E0E0E0;
+        font-size: 0.75rem;
+      }
+      .inputs input:focus {
+        border-bottom: 2px solid #E0E0E0;
+      }
+      .inputs img {
+        position: absolute;
+      }
+      .emailImg {
+        top: 64px;
+      }
+      .passwordImg {
+        top: 108px;
+      }
+      ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+        color: #fff;
+        opacity: 1; /* Firefox */
+      }
+      :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: #fff;
+      }
+      ::-ms-input-placeholder { /* Microsoft Edge */
+        color: #fff;
+      }
+      .login-button { 
+        text-transform: uppercase;
+        padding: 5px 15px;
+        text-align: center;
+        background: #FFFFFF;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        outline: none;
+        border: none;
+        width: 100%;
+        height: 40px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+      .login-button:hover, .bottom-text span:hover {
+          cursor: pointer;
+      }
+      .submit-btn {
+          margin: 15px 0;
+          color: #1C7067;
+          background-color: #FFFFFF;
+      }
+      .facebook-btn {
+        background-color: #4968A8;
+      }
+      .google-btn {
+        background-color: #E8453C;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+      }
+      .social-btns {
+        justify-content: center;
+      }
+      .social-btns button:first-child {
+          margin-right: 20px;
+      }
+      .social-btns button {
+        margin: 15px 0;
+        color: #fff;
+      }
+      .social-btns button span {
+        position: relative;
+        bottom: 5px;
+      }
+      .hr-text {
+        line-height: 1em;
+        position: relative;
+        outline: 0;
+        border: 0;
+        color: black;
+        text-align: center;
+        height: 1.5em;
+        opacity: .5;
+      }
+      .hr-text::before {
+        content: '';
+        background: linear-gradient(to right, transparent, #cee0df, transparent);
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+      }
+      .hr-text::after {
+        content: attr(data-content);
+        position: relative;
+        display: inline-block;
+        color: black;
+        padding: 0 .5em;
+        line-height: 1.5em;
+        color: #cee0df;
+        background: linear-gradient(180deg, rgba(58, 131, 124, 0.8) 0%, rgba(255, 255, 255, 0) 100%), #3A837C;
+      }
+      .bottom-text {
+        color: #fff;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+      .loginText {
+        text-align: center;
+        width: 100%;
+      }
+      *[hidden] {
+        display: none !important;
+      }
+      .errMsg {
+        padding: 5px;
+        border: 1px solid red;
+        background-color: #fcb5b5;
+        color: #be1c1c;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 5px;
+      }
+    </style>
+    <firebase-auth id="auth" user="{{user}}" signed-in="{{signedIn}}" provider="google" on-error="handleError"></firebase-auth>
+
+    <div class="welcome-card">
+        <h2>Welcome!</h2>
+        <div class="inputs">
+          <img class="emailImg" src="../assets/email_24px.svg" alt="Email" />
+          <input id="email" type="text" placeholder="Email">
+          <img class="passwordImg" src="../assets/lock_24px.svg" alt="Password" hidden="[[resetPassword]]" />
+          <input id="password" type="password" placeholder="Password" hidden="[[resetPassword]]">
+          
+          <button hidden="[[!isNew]]" class="login-button submit-btn" on-click="registerNew">Resgister</button>
+          <button hidden="[[!showLoginBtn]]" class="login-button submit-btn" on-click="traditionalSignIn">Login</button>
+          <button hidden="[[!resetPassword]]" class="login-button submit-btn" on-click="sendPasswordReset">Send Reset Email</button>
+          <div hidden="[[hideErr]]" class="errMsg">
+            <span>[[errMsg]]</span>
+          </div>
+        </div>
+
+        <hr class="hr-text" data-content="Or Connect With" />
+        <div class="social-btns flex-row">
+            <button class="login-button google-btn" on-click="googleSignIn"><img src="../assets/google_icon.svg" alt="Account" /> <span>Google</span></button>
+            <button class="login-button facebook-btn" on-click="facebookSignIn"><img src="../assets/facebook_icon.svg" alt="Account" /> <span>Facebook</span></button>
+        </div>
+        <div class="bottom-text">
+          <div hidden="[[!isNew]]" class="loginText">
+              <span on-click="loginSwitch">Have an Account? Login</span>
+          </div>
+          <div class="bottom-text flex-row" hidden="[[isNew]]">
+              <span on-click="resetSwitch">Forgot password?</span>
+              <span on-click="signUp">New here? Sign Up</span>
+          </div>
+        </div>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class LoginView extends Polymer.Element {
+      static get is() { return 'login-view'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'login-view'
+          },
+          isNew: {
+            type: Boolean,
+            value: false
+          },
+          showLoginBtn: {
+            type: Boolean,
+            value: true
+          },
+          signedIn: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer: 'checkSigin'
+          },
+          
+          user: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          resetPassword: {
+            type: Boolean,
+            value: false
+          },
+          hideErr: {
+            type: Boolean,
+            value: true
+          },
+          errMsg: {
+            type: String,
+            value: "There was a problem, please try again"
+          },
+          page: {
+            type: String,
+            value: '',
+            notify: true
+          }
+        };
+      }
+      attached() {
+        window.addEventListener('logout', function(){
+          console.log('i hear you');
+        });
+      }
+      handleError() {
+        this.errMsg = "There was a problem, please try again";
+        this.showErr();
+      }
+      traditionalSignIn() {
+        if (!this.$.email.value || !this.$.password.value) {
+          this.errMsg = "Invalid Email or Password";
+          this.showErr();
+        }
+        this.$.auth.signInWithEmailAndPassword(this.$.email.value, this.$.password.value).then(function(response){
+        }.bind(this)).catch(function(err){
+          this.errMsg = err.message;
+          this.showErr();
+        }.bind(this));
+      }
+      googleSignIn() {
+        this.$.auth.signInWithPopup('google').then(function(response){
+        }.bind(this)).catch(function(err){
+          this.errMsg = err.message;
+          this.showErr();
+        }.bind(this));
+      }
+      facebookSignIn() {
+        this.$.auth.signInWithPopup('facebook').then(function(response){
+        }.bind(this)).catch(function(err){
+          this.errMsg = err.message;
+          this.showErr();
+        }.bind(this));
+      }
+      signUp() {
+        this.isNew = true;
+        this.showLoginBtn = false;
+        this.resetPassword = false;
+      }
+      loginSwitch() {
+        this.showLoginBtn = true;
+        this.isNew = false;
+        this.resetPassword = false;
+      }
+      resetSwitch() {
+        this.resetPassword = true;
+        this.showLoginBtn = false;
+        this.isNew = false;
+      }
+      sendPasswordReset() {
+        debugger;
+        if (!this.$.email.value) {
+          this.errMsg = "Invalid Email";
+          this.showErr();
+        }
+        this.$.auth.sendPasswordResetEmail(this.$.email.value).then(function(resp){
+          console.log(resp);
+        }).catch(function(err){
+          this.errMsg = err.message;
+          this.showErr();
+        }.bind(this));
+      }
+      registerNew() {
+        if (!this.$.email.value || !this.$.password.value) {
+          this.errMsg = "Invalid Email or Password";
+          this.showErr(1500);
+        }
+        this.$.auth.createUserWithEmailAndPassword(this.$.email.value, this.$.password.value).then(function(resp){
+          console.log(resp);
+        }.bind(this)).catch(function(err){
+          this.errMsg = err.message;
+          this.showErr();
+        }.bind(this));
+      }
+      showErr(delay = 40000){
+        this.hideErr = false;
+        setTimeout(function(){
+          this.hideErr = true;
+        }.bind(this),delay);
+      }
+      checkSigin(test) {
+        console.log('signedIn status:', this.signedIn);
+        if (!window.app) window.app = { user: {} }; 
+        window.app.user = this.user;
+        if(this.signedIn) {
+          window.history.pushState({}, null, 'store');
+          window.dispatchEvent(new CustomEvent ('location-changed'));
+        } else {
+          window.history.pushState({}, null, 'login');
+          window.dispatchEvent(new CustomEvent ('location-changed'));
+        }
+      }
+      _logout() {
+        console.log('you want to log out, eh?');
+      }
+     }
+    window.customElements.define(LoginView.is, LoginView);
+  </script>
+</dom-module>
