@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
 
 <dom-module id="receipts-view">
   <template>
@@ -7,6 +9,12 @@
         display: block;
       }
     </style>
+    <firebase-query id="receipts" 
+                    path="{{receiptPath}}" 
+                    order-by-child="userId" 
+                    equal-to="{{uid}}" 
+                    data="{{receiptData}}"></firebase-query>
+
     <p>Hello [[prop1]]!</p>
   </template>
 
@@ -22,8 +30,32 @@
           prop1: {
             type: String,
             value: 'receipts-view'
-          }
+          },
+          receiptData: {
+            type: Object,
+            observer: "checkReceipt"
+          },
+          user: {
+            type: Object,
+            observer: "checkUser"
+          },
+          uid: {
+            type: String
+          },
         };
+      }
+      checkUser(_user) {
+        console.log('uid: ', window.app.user.uid);
+        if (_user) {
+          this.uid = _user.uid;
+          this.receiptPath = '/receipts'
+        }
+      }
+      checkReceipt(_receipt) {
+        if (_receipt) {
+          console.log('receipt: ', _receipt);
+          this.items = _receipt;
+        }
       }
     }
 
