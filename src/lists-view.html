@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
 
 <dom-module id="lists-view">
   <template>
@@ -6,8 +8,72 @@
       :host {
         display: block;
       }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .flex-row * {
+        align-self: center;
+      }
+      .list-label {
+        margin-left: 10px;
+      }
+      .blue {
+        color: #2F80ED;
+      }
+      .plus-svg {
+        fill: #2F80ED;
+      }
+      .grey {
+        color: #BDBDBD;
+      }
+      .lists-svg {
+        height: 30px;
+        width: 30px;
+        fill: #BDBDBD;
+      }
+      .add-btn {
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 14px;
+        outline: none;
+        border: none;
+        padding: 10px 10px 10px 0;
+        margin: 15px 0 0 0;
+        background-color: transparent;
+      }
+      .add-btn:hover {
+        cursor: pointer;
+      }
     </style>
+    <firebase-query id="lists" 
+                    path="{{listPath}}" 
+                    order-by-child="userId" 
+                    equal-to="{{uid}}" 
+                    data="{{listData}}"></firebase-query>
+
     <p>Hello [[prop1]]!</p>
+    <iron-list items="[[items]]">
+      <template>
+        <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
+          <div class="flex-row">
+            <svg class="lists-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+            <span class="list-label">[[item.listName]]</span>
+          </div>
+          <span class="grey">[[item.items.length]]</span>
+        </div>
+      </template>
+    </iron-list>
+    <button class="flex-row blue add-btn">
+      <svg class="plus-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        <path d="M0 0h24v24H0z" fill="none"/>
+      </svg>
+      <span>Add List</span>
+    </button>
   </template>
 
   <script>
@@ -22,8 +88,48 @@
           prop1: {
             type: String,
             value: 'lists-view'
+          },
+          listData: {
+            type: Object,
+            observer: "checkList"
+          },
+          user: {
+            type: Object,
+            observer: "checkUser"
+          },
+          uid: {
+            type: String
+          },
+          selectedList: {
+            type: Object,
+            notify: true
           }
         };
+      }
+
+      checkUser(_user) {
+        console.log('uid: ', window.app.user.uid);
+        if (_user) {
+          this.uid = _user.uid;
+          this.listPath = '/shopLists'
+        }
+      }
+      checkList(_lists) {
+        if (_lists) {
+          console.log('list: ', _lists);
+          this.items = _lists;
+        }
+      }
+      _viewList(e) {
+        var localTarget = Polymer.dom(e).localTarget;
+        if (localTarget) {
+          var listId = localTarget.closest('.item-container').id;
+          var selectedList = this.items.filter(list => list.$key === listId);
+          this.selectedList = selectedList;
+          window.history.pushState({}, null, 'list/' + listId);
+          window.dispatchEvent(new CustomEvent ('location-changed'));
+        }
+        
       }
     }
 

@@ -3,13 +3,14 @@
   "description": "Web app designed to provide a quicker way of checking out at stores.",
   "main": "index.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^2.0.0",
-    "app-route": "PolymerElements/app-route#^2.0.3",
-    "iron-pages": "PolymerElements/iron-pages#^2.0.1",
-    "polymerfire": "firebase/polymerfire#^2.2.1"
+    "polymer": "Polymer/polymer#^2.x",
+    "app-route": "PolymerElements/app-route#^2.x",
+    "iron-list": "PolymerElements/iron-list#^2.x",
+    "iron-pages": "PolymerElements/iron-pages#^2.x",
+    "polymerfire": "firebase/polymerfire#^2.x"
   },
   "devDependencies": {
-    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+    "web-component-tester": "Polymer/web-component-tester#^6.x",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.x"
   }
 }

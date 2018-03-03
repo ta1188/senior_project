@@ -27,8 +27,9 @@
         };
       }
       logout(){
-        console.log('logging');
-        document.dispatchEvent(new CustomEvent ('logout'));
+        // By default, custom events stop at shadow DOM boundaries
+        // To bypass this you have to set the `composed` flag to true
+        window.dispatchEvent(new CustomEvent('logout', {bubbles: true, composed: true}));
       }
     }
 
