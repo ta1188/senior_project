@@ -333,9 +333,18 @@
         if (this.user) window.app.user = this.user;
 
         if(this.signedIn) {
-          window.history.pushState({}, null, 'store');
+          var path = window.redirectPath || 'store';
+          if (path === '/login') path = 'store'; // Default redirect
+          if (path === '/list') path = 'lists'; // Prevent single list return
+          if (path === '/receipt') path = 'receipts'; // Prevent single receipt return
+          if (path.substr()[0] === '/') path = path.substr(1); // getting rid of '/'
+          window.history.pushState({}, null, path);
           window.dispatchEvent(new CustomEvent ('location-changed'));
+          debugger;
         } else {
+          if (window.location.pathname) {
+            window.redirectPath = window.location.pathname;
+          }
           window.history.pushState({}, null, 'login');
           window.dispatchEvent(new CustomEvent ('location-changed'));
         }

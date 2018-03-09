@@ -1,13 +1,93 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 
 <dom-module id="list-view">
   <template>
     <style>
       :host {
         display: block;
+        height: 100%;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .flex-row * {
+        align-self: center;
+      }
+      .list-label {
+        margin-left: 10px;
+      }
+      .blue {
+        color: #2F80ED;
+      }
+      .grey {
+        color: #BDBDBD;
+      }
+      .lists-svg {
+        height: 30px;
+        width: 30px;
+        fill: #BDBDBD;
+      }
+      paper-checkbox {
+        --paper-checkbox-checked-color: #eeeeee;
+        --paper-checkbox-unchecked-color: #BDBDBD;
+        --paper-checkbox-checkmark-color: #3A837C;
+        --paper-checkbox-label-color: #4F4F4F;
+        --paper-checkbox-ink-size: 0px;
+      }
+      iron-list {
+        height: calc(100vh - 245px);
+      }
+      input {
+        font-family: Verdana, Geneva, sans-serif;
+        padding: 10px 0;
+        width: 100%;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        color: #4F4F4F;
+        text-indent: 35px;
+        border-bottom: 1px solid #BDBDBD;
+        font-size: 1rem;
+        margin-bottom: 10px;
+      }
+      input:focus {
+        border-bottom: 2px solid #BDBDBD;
+      }
+      .plusImg {
+        fill: #BDBDBD;
+        position: absolute;
+        top: 64px;
+      }
+      ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+        color: #BDBDBD;
+        opacity: 1; /* Firefox */
+      }
+      :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: #BDBDBD;
+      }
+      ::-ms-input-placeholder { /* Microsoft Edge */
+        color: #BDBDBD;
+      }
+      .spacing {
+        padding: 5px 0;
       }
     </style>
     <p>Hello [[prop1]]!</p>
+    <svg class="plusImg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      <path d="M0 0h24v24H0z" fill="none"/>
+    </svg>
+    <input id="itemInput" type="text" placeholder="Add an item...">
+    <iron-list items="[[items]]">
+      <template>
+        <div class="spacing">
+          <paper-checkbox noink>[[item.itemLabel]]</paper-checkbox>
+        </div>
+      </template>
+    </iron-list>
   </template>
 
   <script>
@@ -22,8 +102,21 @@
           prop1: {
             type: String,
             value: 'list-view'
+          },
+          selectedList: {
+            type: Object,
+            observer: '_listCheck'
           }
         };
+      }
+
+      _listCheck(list) {
+        if (list && list.length === 1) {
+          window.setBannerLabel(list[0].listName, true);
+          console.log('selectedList: ', list)
+          this.items = list[0].items;
+          debugger;
+        }
       }
     }
 

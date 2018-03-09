@@ -126,7 +126,7 @@
           var listId = localTarget.closest('.item-container').id;
           var selectedList = this.items.filter(list => list.$key === listId);
           this.selectedList = selectedList;
-          window.history.pushState({}, null, 'list/' + listId);
+          window.history.pushState({}, null, 'list');
           window.dispatchEvent(new CustomEvent ('location-changed'));
         }
         
