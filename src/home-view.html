@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 
 <link rel="import" href="./login-view.html">
@@ -12,13 +13,10 @@
 <link rel="import" href="./scanner-view.html">
 <link rel="import" href="./store-view.html">
 <link rel="import" href="./receipts-view.html">
-<link rel="import" href="./receipts-view.html">
+<link rel="import" href="./receipt-view.html">
 <link rel="import" href="./lists-view.html">
 <link rel="import" href="./list-view.html">
 <link rel="import" href="./four-oh-four-view.html">
-
-<!-- <link rel="lazy-import" href="./list-view.html">       <- These will be added in the lists component
-<link rel="lazy-import" href="./receipt-view.html"> -->
 
 <dom-module id="home-view">
   <template>
@@ -98,6 +96,10 @@
         -webkit-filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.25));
         filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.25));
       }
+      .undo-link, .undo-link:visited  {
+        text-decoration: none;
+        color: #d0d037
+      }
     </style>
     <firebase-app
       auth-domain="mbl-checkout.firebaseapp.com"
@@ -140,8 +142,8 @@
           <checkout-view name="checkout"></checkout-view>
           <scanner-view name="scanner"></scanner-view>
           <store-view name="store"></store-view>
-          <lists-view name="lists" user="{{user}}" selected-list="{{selectedList}}"></lists-view>
-          <list-view name="list" user="{{user}}" selected-list="{{selectedList}}"></list-view>
+          <lists-view name="lists" user="{{user}}" list-key="{{listKey}}" list-items="{{listItems}}"></lists-view>
+          <list-view name="list" user="{{user}}" list-key="[[listKey]]" list-items="{{listItems}}"></list-view>
           <receipts-view name="receipts" user="{{user}}"></receipts-view>
           <receipt-view name="receipt"></receipt-view>
     
@@ -163,6 +165,7 @@
         <img src="../assets/list_24px.svg" alt="Shopping Lists" />
       </a>
     </div>
+    <paper-toast class="flex-row" id="toast" text="Hello world!"><a class="undo-link" href="" on-click="fireCallBack">UNDO</a></paper-toast>
   </template>
 
   <script>
@@ -187,11 +190,6 @@
             type: Object,
             notify: true
           },
-          selectedList: {
-            type: Object,
-            reflectToAttribute: true,
-            notify: true
-          },
           page: {
             type: String,
             value: 'login',
@@ -205,11 +203,21 @@
             },
             observer: '_routeChanged'
           },
+          listKey: {
+            type: String,
+            notify: true
+          },
+          listItems: {
+            type: Array,
+            notify: true
+          },
           routeData: Object,
           subroute: String,
         };
       }
-
+      constructor() {
+        super();
+      }
       static get observers() {
         return [
           '_routePageChanged(routeData.page)',
@@ -223,21 +231,29 @@
             if (returnToLists) this.hideListsReturn = false;
           }.bind(this);
         }
+        if (!window.setToast) {
+          window.setToast = function(text, callBackText, itemId) {
+            this.callBackText = callBackText;
+            this.itemId = itemId;
+            this.$.toast.text = text;
+            this.$.toast.open();
+          }.bind(this);
+        }
       }
       
-
+      fireCallBack() {
+        window.dispatchEvent(new CustomEvent(this.callBackText, {bubbles: true, composed: true, detail: {itemId: this.itemId}}));
+      }
       _routePageChanged(page) {
         // Polymer 2.0 will call with `undefined` on initialization.
         // Ignore until we are properly called with a string.
         if (page === undefined)  return;
-        debugger;
         // If no page was found in the route data, page will be an empty string.
         // Deault to 'store' in that case.
         this.page = page || 'store';
       }
 
       _routeChanged(route) {
-        debugger;
         if (!route.path) return;
         var page = route.path;
         if (page.substr()[0] === '/') page = page.substr(1); 

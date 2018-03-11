@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
 
 <dom-module id="lists-view">
   <template>
@@ -53,20 +53,18 @@
                     data="{{listData}}"></firebase-query>
 
     <p>Hello [[prop1]]!</p>
-    <iron-list items="[[items]]">
-      <template>
-        <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
-          <div class="flex-row">
-            <svg class="lists-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-                <path d="M0 0h24v24H0z" fill="none"/>
-            </svg>
-            <span class="list-label">[[item.listName]]</span>
-          </div>
-          <span class="grey">[[item.items.length]]</span>
+    <template is="dom-repeat" items="[[items]]">
+      <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
+        <div class="flex-row">
+          <svg class="lists-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+          <span class="list-label">[[item.listName]]</span>
         </div>
-      </template>
-    </iron-list>
+        <span class="grey">[[item.items.length]]</span>
+      </div>
+    </template>
     <button class="flex-row blue add-btn">
       <svg class="plus-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -77,10 +75,6 @@
   </template>
 
   <script>
-    /**
-     * @customElement
-     * @polymer
-     */
     class ListsView extends Polymer.Element {
       static get is() { return 'lists-view'; }
       static get properties() {
@@ -93,43 +87,88 @@
             type: Object,
             observer: "checkList"
           },
+          listItems: {
+            type: Array
+          },
           user: {
             type: Object,
             observer: "checkUser"
           },
-          uid: {
-            type: String
-          },
-          selectedList: {
-            type: Object,
+          listKey: {
+            type: String,
             notify: true
-          }
+          },
+          uid: String,
+          listName: String,
         };
       }
-
+      connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('listLength', this._updateLength.bind(this));
+      }
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('listLength', this._updateLength.bind(this));
+      }
       checkUser(_user) {
-        console.log('uid: ', window.app.user.uid);
         if (_user) {
+          console.log('uid: ', window.app.user.uid);
           this.uid = _user.uid;
-          this.listPath = '/shopLists'
+          this.listPath = '/shopLists';
         }
       }
       checkList(_lists) {
-        if (_lists) {
+        if (window.app.user.uid && _lists) {
+          // this should be unnecessary... -----------------------------
+          _lists.forEach(function(list) { 
+            var itemsList = list.items;
+            var tempArr = [];
+            for (var key in itemsList) {
+              if (itemsList.hasOwnProperty(key)) {
+                tempArr.push(itemsList[key]);
+              }
+            }
+            list.items = tempArr;
+          }); // -------------------------------------------------------
           console.log('list: ', _lists);
           this.items = _lists;
         }
       }
       _viewList(e) {
+        console.log('_viewList');
         var localTarget = Polymer.dom(e).localTarget;
         if (localTarget) {
           var listId = localTarget.closest('.item-container').id;
           var selectedList = this.items.filter(list => list.$key === listId);
-          this.selectedList = selectedList;
-          window.history.pushState({}, null, 'list');
-          window.dispatchEvent(new CustomEvent ('location-changed'));
+          if (this.listName === selectedList[0].listName) {
+            this.transitionPage();
+          } else {
+            this.listName = selectedList[0].listName;
+            this.listKey = listId;
+            this.transitionPage();
+          }
+        } 
+      }
+      transitionPage() {
+        window.setBannerLabel(this.listName, true);
+        window.history.pushState({}, null, 'list');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
+      }
+      _updateLength(event) {
+        console.log('I hear you');
+        if (event) {
+          var _index;
+          var list = this.items.filter(function(item, index) {
+            if (item.$key === this.listKey) {
+              _index = index;
+              return item;
+            }
+          }.bind(this));
+          var temp = this.items;
+          temp[_index] = list[0];
+          this.items = [];
+          this.items = temp;
         }
-        
       }
     }
 

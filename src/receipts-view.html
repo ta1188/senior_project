@@ -45,14 +45,14 @@
         };
       }
       checkUser(_user) {
-        console.log('uid: ', window.app.user.uid);
         if (_user) {
+          console.log('uid: ', window.app.user.uid);
           this.uid = _user.uid;
           this.receiptPath = '/receipts'
         }
       }
       checkReceipt(_receipt) {
-        if (_receipt) {
+        if (window.app.user.uid && _receipt) {
           console.log('receipt: ', _receipt);
           this.items = _receipt;
         }

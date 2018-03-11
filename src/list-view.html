@@ -1,5 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 
 <dom-module id="list-view">
   <template>
@@ -43,23 +45,17 @@
       input {
         font-family: Verdana, Geneva, sans-serif;
         padding: 10px 0;
-        width: 100%;
+        width: 78%;
         outline: none;
         border: none;
         background-color: transparent;
         color: #4F4F4F;
-        text-indent: 35px;
-        border-bottom: 1px solid #BDBDBD;
         font-size: 1rem;
-        margin-bottom: 10px;
-      }
-      input:focus {
-        border-bottom: 2px solid #BDBDBD;
       }
       .plusImg {
+        width: 24px;
+        height: 24px;
         fill: #BDBDBD;
-        position: absolute;
-        top: 64px;
       }
       ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
         color: #BDBDBD;
@@ -74,27 +70,49 @@
       .spacing {
         padding: 5px 0;
       }
+      * [hidden] {
+        display: none !important;
+      }
+      .input-container {
+        border-bottom: 1px solid #BDBDBD;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+      }
+      .focused {
+        border-bottom: 2px solid #BDBDBD;
+      }
+      .addBtn:hover {
+        cursor: pointer;
+      }
+      .striked {
+        --paper-checkbox-label: {
+          color: #BDBDBD;
+          text-decoration: line-through;
+        }
+      }
+
     </style>
+    <firebase-query id="listItems" 
+                    path="{{listItemsPath}}" 
+                    data="{{listItemsData}}"></firebase-query>
+    <firebase-document id="list" path="{{listPath}}" data="{{listData}}"></firebase-document>
     <p>Hello [[prop1]]!</p>
-    <svg class="plusImg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-      <path d="M0 0h24v24H0z" fill="none"/>
-    </svg>
-    <input id="itemInput" type="text" placeholder="Add an item...">
-    <iron-list items="[[items]]">
-      <template>
-        <div class="spacing">
-          <paper-checkbox noink>[[item.itemLabel]]</paper-checkbox>
-        </div>
-      </template>
-    </iron-list>
+    <div id="inputContainer" class="flex-row input-container">
+      <svg class="plusImg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        <path d="M0 0h24v24H0z" fill="none"/>
+      </svg>
+      <input id="itemInput" type="text" placeholder="Add an item..." on-focus="focused" on-blur="blurred" on-input="inputChange">
+      <span class="blue addBtn" hidden="[[hideInputAdd]]" on-click="addItem">ADD</span>
+    </div>
+    <template is="dom-repeat" id="ironList" items="[[listItemsData]]">
+      <div class="spacing" id="[[item.$key]]">
+        <paper-checkbox noink on-change="removeItem">[[item.itemLabel]]</paper-checkbox>
+      </div>
+    </template>
   </template>
 
   <script>
-    /**
-     * @customElement
-     * @polymer
-     */
     class ListView extends Polymer.Element {
       static get is() { return 'list-view'; }
       static get properties() {
@@ -103,20 +121,123 @@
             type: String,
             value: 'list-view'
           },
-          selectedList: {
+          listItemsData: {
+            type: Array,
+            observer: "checkListItems"
+          },
+          listItems: {
+            type: Array,
+            notify: true
+          },
+          listData: {
             type: Object,
-            observer: '_listCheck'
+            value: {}
+          },
+          hideInputAdd: {
+            type: Boolean,
+            value: true
+          },
+          saveItem: {
+            type: Boolean,
+            value: false
+          },
+          listKey: {
+            type: String,
+            observer: 'updatePath'
           }
         };
       }
 
-      _listCheck(list) {
-        if (list && list.length === 1) {
-          window.setBannerLabel(list[0].listName, true);
-          console.log('selectedList: ', list)
-          this.items = list[0].items;
-          debugger;
+      connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('undoRemove', this._undoRemove.bind(this));
+      }
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('undoRemove', this._undoRemove.bind(this));
+      }
+      updatePath(_listKey) {
+        this.listItemsPath = '/shopLists/' + _listKey + '/items';
+      }
+      checkListItems(_listItems) {
+        if(window.app.user.uid) {
+          console.log('_listItems: ', _listItems);
+          this.listItems = _listItems;
         }
+      }
+      inputChange() {
+        if (this.$.itemInput.value.length) this.hideInputAdd = false;
+        else this.hideInputAdd = true;
+      }
+      focused() {
+        this.$.inputContainer.classList.add('focused');
+      }
+      blurred() {
+        this.$.inputContainer.classList.remove('focused');
+      }
+      addItem() {
+        console.log('adding item, key:', this.listKey);
+        this.hideInputAdd = true;
+        var ref = window.firebase.database().ref('shopLists/' + this.listKey + '/items');
+        var newRef = ref.push().key;
+        var updates = {};
+        updates[newRef] = { itemLabel: this.$.itemInput.value };
+        ref.update(updates)
+        .then(function() {
+          this.$.itemInput.value = '';
+          this.emmitLength();
+          return ref.once("value");
+        }.bind(this));
+      }
+      removeItem(e) {
+        console.log('removing', e);
+        var _localTarget = Polymer.dom(e).localTarget;
+        var divId = _localTarget.parentElement.id;
+        var itemText = _localTarget.innerText; // Checkbox text
+        if (divId) window.setToast('Deleted ' + itemText, 'undoRemove', divId);
+        _localTarget.classList.add('striked');
+        _localTarget.disabled = true;
+        setTimeout(function(){
+          console.log('Time to kill it');
+          this.destroyIt(_localTarget, divId);
+        }.bind(this), 2800);
+      }
+      _undoRemove(e) {
+        var _itemId = e.detail.itemId;
+        if (_itemId) {
+          this.saveItem = true;
+        }
+      }
+      destroyIt(_localTarget, _itemId) {
+        if(!this.saveItem) {
+          this.$.list.path = 'shopLists/' + this.listKey + '/items/' + _itemId;
+          this.$.list.destroy().then(function(){
+            var box;
+            /* Having to add this code to do something that
+            *  Polymer should have been able to do already...
+            */
+            if (Polymer.Settings.useShadow) {
+              box = this.root.querySelector('paper-checkbox.striked');
+            } else {
+              box = this.querySelector('paper-checkbox.striked');
+            }
+            if (box) {
+              box.checked = false;
+              box.disabled = false;
+              box.classList.remove('striked');
+            }
+            this.emmitLength();
+          }.bind(this));
+        } else {
+          _localTarget.classList.remove('striked');
+          _localTarget.checked = false;
+          _localTarget.disabled = false;
+          this.saveItem = false;
+        }
+      }
+      emmitLength() {
+        console.log('this.listItemsData.length', this.listItemsData.length);
+        window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length}}));
       }
     }
 

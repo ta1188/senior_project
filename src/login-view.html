@@ -340,7 +340,6 @@
           if (path.substr()[0] === '/') path = path.substr(1); // getting rid of '/'
           window.history.pushState({}, null, path);
           window.dispatchEvent(new CustomEvent ('location-changed'));
-          debugger;
         } else {
           if (window.location.pathname) {
             window.redirectPath = window.location.pathname;
