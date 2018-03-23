@@ -1,32 +1,40 @@
-<svg width="36" height="23" viewBox="0 0 36 23" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <g id="Canvas" transform="translate(176 713)">
-        <g id="receipt">
-            <g id="Vector">
-                <use xlink:href="#path0_fill" transform="translate(-176 -713)" fill="#FFFFFF"/>
-            </g>
-            <g id="Vector">
-                <use xlink:href="#path1_fill" transform="translate(-158 -713)" fill="#FFFFFF"/>
-            </g>
-            <g id="Vector">
-                <use xlink:href="#path0_fill" transform="translate(-151.25 -713)" fill="#FFFFFF"/>
-            </g>
-            <g id="Vector">
-                <use xlink:href="#path0_fill" transform="translate(-146.75 -713)" fill="#FFFFFF"/>
-            </g>
-            <g id="Vector">
-                <use xlink:href="#path0_fill" transform="translate(-142.25 -713)" fill="#FFFFFF"/>
-            </g>
-            <g id="Vector">
-                <use xlink:href="#path2_fill" transform="translate(-171.5 -713)" fill="#FFFFFF"/>
-            </g>
-            <g id="Vector">
-                <use xlink:href="#path0_fill" transform="translate(-162.5 -713)" fill="#FFFFFF"/>
-            </g>
-        </g>
+<svg width="54" height="40" viewBox="0 0 54 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Canvas" transform="translate(185 722)">
+    <g id="receipt">
+    <g id="Vector">
+        <use xlink:href="#path0_fill" transform="translate(-176 -713)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path1_fill" transform="translate(-158 -713)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path0_fill" transform="translate(-151.25 -713)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path0_fill" transform="translate(-146.75 -713)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path0_fill" transform="translate(-142.25 -713)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path2_fill" transform="translate(-171.5 -713)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path0_fill" transform="translate(-162.5 -713)" fill="#FFFFFF"/>
+    </g>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path3_stroke" transform="translate(-185 -720)" fill="#FFFFFF"/>
+    </g>
+    <g id="Vector">
+    <use xlink:href="#path4_stroke" transform="matrix(-1 0 0 -1 -131 -684)" fill="#FFFFFF"/>
+    </g>
     </g>
     <defs>
-        <path id="path0_fill" d="M 0 0L 2.25 0L 2.25 22.5L 0 22.5L 0 0Z"/>
-        <path id="path1_fill" d="M 0 0L 4.5 0L 4.5 22.5L 0 22.5L 0 0Z"/>
-        <path id="path2_fill" d="M 0 0L 6.75 0L 6.75 22.5L 0 22.5L 0 0Z"/>
+    <path id="path0_fill" d="M 0 0L 2.25 0L 2.25 22.5L 0 22.5L 0 0Z"/>
+    <path id="path1_fill" d="M 0 0L 4.5 0L 4.5 22.5L 0 22.5L 0 0Z"/>
+    <path id="path2_fill" d="M 0 0L 6.75 0L 6.75 22.5L 0 22.5L 0 0Z"/>
+    <path id="path3_stroke" d="M 8.08475 -1.43908L 0 -1.43908L 0 1.56092L 8.08475 1.56092L 8.08475 -1.43908ZM 8.08475 34.5L 0 34.5L 0 37.5L 8.08475 37.5L 8.08475 34.5ZM 0 0L 0 35.5736L 3 35.5736L 3 0L 0 0Z"/>
+    <path id="path4_stroke" d="M 8 -1.5L 0 -1.5L 0 1.5L 8 1.5L 8 -1.5ZM 8 34.5L 0 34.5L 0 37.5L 8 37.5L 8 34.5ZM 0 0.183051L 0 35.8169L 3 35.8169L 3 0.183051L 0 0.183051Z"/>
     </defs>
-  </svg>
+</svg>

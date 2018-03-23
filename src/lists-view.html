@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
 
 <dom-module id="lists-view">
@@ -45,15 +46,59 @@
       .add-btn:hover {
         cursor: pointer;
       }
+      .item-container {
+        margin-bottom: 10px;
+      }
+      #addListInput {
+        font-family: Verdana, Geneva, sans-serif;
+        padding: 10px 0;
+        width: 78%;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        color: #4F4F4F;
+        font-size: 1rem;
+        border-bottom: 1px solid #BDBDBD;
+      }
+      #addListInput:focus {
+        border-bottom: 2px solid #BDBDBD;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .shake-no {
+        animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+      }
+
+      @keyframes shake {
+        10%, 90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        
+        20%, 80% {
+          transform: translate3d(2px, 0, 0);
+        }
+
+        30%, 50%, 70% {
+          transform: translate3d(-4px, 0, 0);
+        }
+
+        40%, 60% {
+          transform: translate3d(4px, 0, 0);
+        }
+      }
     </style>
     <firebase-query id="lists" 
-                    path="{{listPath}}" 
+                    path="/shopLists" 
                     order-by-child="userId" 
                     equal-to="{{uid}}" 
                     data="{{listData}}"></firebase-query>
-
+    <firebase-document id="newList" path="/shopLists/" data="{{newListData}}"></firebase-document>
     <p>Hello [[prop1]]!</p>
-    <template is="dom-repeat" items="[[items]]">
+    <template id="repeater" is="dom-repeat" items="[[items]]">
       <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
         <div class="flex-row">
           <svg class="lists-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
@@ -62,16 +107,20 @@
           </svg>
           <span class="list-label">[[item.listName]]</span>
         </div>
-        <span class="grey">[[item.items.length]]</span>
+        <span class="grey">[[item.itemsLength]]</span>
       </div>
     </template>
-    <button class="flex-row blue add-btn">
+    <button hidden="[[addingList]]" class="flex-row blue add-btn" on-click="showListInput">
       <svg class="plus-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
         <path d="M0 0h24v24H0z" fill="none"/>
       </svg>
       <span>Add List</span>
     </button>
+    <div class="flex-row" hidden="[[!addingList]]">
+      <input id="addListInput" type="text" placeholder="List name...">
+      <span id="addBtn" class="blue addBtn" on-click="addList">ADD</span>
+    </div>
   </template>
 
   <script>
@@ -98,6 +147,10 @@
             type: String,
             notify: true
           },
+          addingList: {
+            type: Boolean,
+            value: false
+          },
           uid: String,
           listName: String,
         };
@@ -114,11 +167,12 @@
         if (_user) {
           console.log('uid: ', window.app.user.uid);
           this.uid = _user.uid;
-          this.listPath = '/shopLists';
         }
       }
       checkList(_lists) {
-        if (window.app.user.uid && _lists) {
+        if (window.app.user.uid && _lists && _lists.length) {
+          // NOTE: length of object is:
+                //  `Object.keys(myObj).length`
           // this should be unnecessary... -----------------------------
           _lists.forEach(function(list) { 
             var itemsList = list.items;
@@ -129,9 +183,11 @@
               }
             }
             list.items = tempArr;
+            list.itemsLength = tempArr.length;
           }); // -------------------------------------------------------
           console.log('list: ', _lists);
-          this.items = _lists;
+          this.items = _lists.slice();
+          this.$.repeater.render();
         }
       }
       _viewList(e) {
@@ -164,10 +220,50 @@
               return item;
             }
           }.bind(this));
-          var temp = this.items;
+          var temp = this.listData;
+          this.listData = [];
           temp[_index] = list[0];
-          this.items = [];
-          this.items = temp;
+          temp[_index].listLength = event.detail.length;
+          // this.items = temp;
+          this.set('items', temp);
+          // this.$.repeater.render();
+          // this._updateLists();
+        }
+      }
+      showListInput() {
+        this.addingList = true;
+        this.$.addListInput.focus();
+      }
+      addList() {
+        var listName = this.$.addListInput.value;
+        if (!listName) {
+          this.$.addBtn.classList.add('shake-no');
+          setTimeout(function(){
+            this.$.addBtn.classList.remove('shake-no');
+          }.bind(this), 900);
+        } else {
+          this.newListData = {
+            items: 0,
+            listName: listName,
+            userId: window.app.user.uid
+          }
+          this.$.newList.saveValue(this.$.newList.path).then(function(resp) {
+            this.items = this.listData.slice();
+            this._updateLists();
+          }.bind(this));
+          this.$.addBtn.classList.remove('shake-no');
+          this.addingList = false;
+        }
+      }
+      _updateLists(event) {
+        if (event) {
+          this.listData = this.listData.slice();
+          // this.listData = event.detail.itemsArr;
+          // this.
+          console.log('updating', this.listData);
+          // console.log('updating', event.detail.itemsArr);
+          // this.notifyPath('listData');
+          // this.$.repeater.render();
         }
       }
     }

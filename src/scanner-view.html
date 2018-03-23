@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<script type="text/javascript" src="../bower_components/quagga/dist/quagga.min.js"></script>
 
 <dom-module id="scanner-view">
   <template>
@@ -6,8 +7,13 @@
       :host {
         display: block;
       }
+      .scanner-view {
+        height: 70vh;
+        width: 100%;
+      }
     </style>
     <p>Hello [[prop1]]!</p>
+    <div id="scanna" class="scanner-view"></div>
   </template>
 
   <script>
@@ -19,11 +25,77 @@
       static get is() { return 'scanner-view'; }
       static get properties() {
         return {
+          active: {
+            type: Boolean,
+            value: false,
+            observer: 'test'
+          },
+          quaggaReady: {
+            type: Boolean,
+            value: false
+          },
           prop1: {
             type: String,
             value: 'scanner-view'
           }
         };
+      }
+      connectedCallback () {
+        super.connectedCallback();
+        if (window.Quagga) {
+          debugger;
+          this.initQuagga();
+        } else {
+          console.log('what the heck is quagga??');
+        }
+      }
+      disconnectedCallback () {
+        // measure something
+      }
+      test(_active) {
+        if (window.Quagga && this.quaggaReady) {
+          debugger;
+          console.log('changing "active"', _active);
+          _active ? Quagga.start() : Quagga.stop();
+        } else {
+          this.initQuagga();
+        }
+      }
+      initQuagga() {
+        Quagga.init({
+            inputStream : {
+              name : "Live",
+              type : "LiveStream",
+              target: this.$.scanna,
+              constraints: {
+                width: window.screen.width - 40,
+                height: window.screen.height - 210,
+                facingMode: "environment" // or "user" for the front camera
+              },
+            },
+            locator: {
+              patchSize: "medium",
+              halfSample: true
+            },
+            numOfWorkers: (navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4),
+            locate: true,
+            decoder : {
+              readers : ["code_128_reader"]
+            }
+          }, function(err) {
+              if (err) {
+                  console.log(err);
+                  return
+              }
+              console.log("Initialization finished. Ready to start");
+              // Quagga.start();
+              this.quaggaReady = true;
+          }.bind(this));
+
+          Quagga.onDetected(function(result){
+            window.setToast('result: ' + result);
+            console.log('result: ', result);
+          });
       }
     }
 

@@ -70,7 +70,7 @@
       .spacing {
         padding: 5px 0;
       }
-      * [hidden] {
+      [hidden] {
         display: none !important;
       }
       .input-container {
@@ -190,7 +190,6 @@
         }.bind(this));
       }
       removeItem(e) {
-        console.log('removing', e);
         var _localTarget = Polymer.dom(e).localTarget;
         var divId = _localTarget.parentElement.id;
         var itemText = _localTarget.innerText; // Checkbox text
@@ -237,7 +236,7 @@
       }
       emmitLength() {
         console.log('this.listItemsData.length', this.listItemsData.length);
-        window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length}}));
+        window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length, itemsArr: this.listItemsData}}));
       }
     }
 

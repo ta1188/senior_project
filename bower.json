@@ -8,7 +8,8 @@
     "iron-pages": "PolymerElements/iron-pages#^2.x",
     "polymerfire": "firebase/polymerfire#^2.x",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.2",
-    "paper-toast": "PolymerElements/paper-toast#^2.1.0"
+    "paper-toast": "PolymerElements/paper-toast#^2.1.0",
+    "quagga": "^0.12.1"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.x",

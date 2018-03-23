@@ -1,14 +1,166 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 
 <dom-module id="account-view">
   <template>
     <style>
       :host {
         display: block;
+        color: #828282;
+      }
+      .flex-start {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .space-between {
+        justify-content: space-between;
+      }
+      .flex-row {
+        flex-direction: row;
+      }
+      .flex-column {
+        flex-direction: column;
+      }
+      .flex-column * {
+        font-size: 14px;
+      }
+      .flex-column button {
+        color: #828282;
+        align-self: start;
+      }
+      .flex-column span {
+        align-self: flex-start;
+        margin-left: 10px;
+        font-weight: bold;
+      }
+      .icon-svg {
+        height: 30px;
+        width: 30px;
+        fill: #828282;
+        margin-right: 10px;
+      }
+      .margin-bottom {
+        margin-bottom: 35px;
+      }
+      .logout-btn {
+        margin-top: 10px;
+        width: 100%;
+        padding: 15px;
+        background: #1C7067;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        color: #FFFFFF;
+      }
+      .shake-no {
+        animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+      }
+
+      @keyframes shake {
+        10%, 90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        
+        20%, 80% {
+          transform: translate3d(2px, 0, 0);
+        }
+
+        30%, 50%, 70% {
+          transform: translate3d(-4px, 0, 0);
+        }
+
+        40%, 60% {
+          transform: translate3d(4px, 0, 0);
+        }
+      }
+      .add-btn {
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 14px;
+        outline: none;
+        border: none;
+        padding: 10px 10px 10px 0;
+        margin: 15px 0 0 0;
+        background-color: transparent;
+      }
+      .add-btn:hover {
+        cursor: pointer;
+      }
+      .blue {
+        color: #2F80ED;
+      }
+      .updateInput {
+        font-family: Verdana, Geneva, sans-serif;
+        padding: 5px 0;
+        width: 70%;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        color: #4F4F4F;
+        font-size: 1rem;
+        border-bottom: 1px solid #BDBDBD;
+      }
+      .updateInput:focus {
+        border-bottom: 2px solid #BDBDBD;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .push-down {
+        padding-top: 25px;
       }
     </style>
-    <p>Hello [[prop1]]!</p>
-    <button on-click="logout">Logout</button>
+    <firebase-document id="updateUser" path="{{userPath}}" data="{{userData}}"></firebase-document>
+    <div class="push-down flex-start flex-row margin-bottom">
+      <svg class="icon-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 5.9c1.16 0 2.1.94 2.1 2.1s-.94 2.1-2.1 2.1S9.9 9.16 9.9 8s.94-2.1 2.1-2.1m0 9c2.97 0 6.1 1.46 6.1 2.1v1.1H5.9V17c0-.64 3.13-2.1 6.1-2.1M12 4C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+        <path d="M0 0h24v24H0z" fill="none"/>
+      </svg>
+      <div class="flex-start flex-column" hidden="[[addingName]]">
+        <button on-click="changeName">[[nameActionLabel]] Name</button>
+        <span hidden="[[!userName]]">[[userName]]</span>
+      </div>
+      <div class="flex-start flex-row space-between" hidden="[[!addingName]]">
+        <input id="nameInput" class="updateInput" type="text" placeholder="First name">
+        <span id="addNameBtn" class="blue addBtn" on-click="saveName">UPDATE</span>
+      </div>
+    </div>
+    <div class="flex-start flex-row margin-bottom">
+      <svg class="icon-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+      </svg>
+      <div class="flex-start flex-column" hidden="[[addingEmail]]">
+          <button on-click="changeEmail">Email</button>
+          <span hidden="[[!userEmail]]">[[userEmail]]</span>
+      </div>
+      <div class="flex-start flex-row space-between" hidden="[[!addingEmail]]">
+          <input id="emailInput" class="updateInput" type="text" placeholder="Email" value="{{userEmail}}">
+          <span id="addEmailBtn" class="blue addBtn" on-click="saveEmail">UPDATE</span>
+        </div>
+    </div>
+    <div class="flex-start flex-row margin-bottom">
+      <svg class="icon-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6zM18 20H6V10h12v10z"/>
+      </svg>
+      <div class="flex-start flex-column">
+        <button on-click="changePass">Send Password Reset Email</button>
+      </div>
+    </div>
+    <div class="flex-start flex-row margin-bottom">
+      <svg class="icon-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+      </svg>
+      <div class="flex-start flex-column">
+        <button on-click="viewBillingInfo">Billing Information</button>
+      </div>
+    </div>
+    <button class="logout-btn" on-click="logout">LOGOUT</button>
   </template>
 
   <script>
@@ -20,17 +172,121 @@
       static get is() { return 'account-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'account-view'
+          user: {
+            type: Object,
+            observer: "checkUser"
+          },
+          addingName: {
+            type: Boolean,
+            value: false
+          },
+          addingEmail: {
+            type: Boolean,
+            value: false
           }
         };
+      }
+      checkUser(_user) {
+        if (_user) {
+          console.log('uid: ', window.app.user.uid);
+          this.uid = _user.uid;
+          this.userEmail = _user.email;
+          this.userName = _user.displayName || '';
+          this.nameActionLabel = this.userName ? 'Change' : 'Add';
+        }
+      }
+      changeName() {
+        this.addingName = true;
+        this.$.nameInput.focus();
+        // this.userData = {
+        //   displayName: 'entered name'
+        // }
+        // this.updateUser.saveValue('/users/' + this.uid + '/displayName');
+      }
+      saveName() {
+        var nameInput = this.$.nameInput.value;
+        if (!nameInput) {
+          this.$.addNameBtn.classList.add('shake-no');
+          setTimeout(function(){
+            this.$.addNameBtn.classList.remove('shake-no');
+          }.bind(this), 900);
+        } else {
+          this.userData = nameInput;
+          var user = firebase.auth().currentUser;
+          debugger;
+          user.updateProfile({
+              displayName: nameInput,
+            }).then(function(resp) {
+              console.log('successful', resp);
+              // Now sync up the user's db record
+              this.$.updateUser.saveValue('/users/' + this.uid, 'displayName').then(function(resp) {
+                this.userName = nameInput;
+                nameInput = '';
+                this.addingName = false;
+              }.bind(this));
+            }.bind(this)).catch(function(error) {
+              console.log('error', error);
+              // An error happened.
+            });        
+          
+        }
+      }
+      changeEmail() {
+        this.addingEmail = true;
+        this.$.emailInput.focus();
+      }
+      saveEmail() {
+        var emailInput = this.$.emailInput.value;
+        if (!emailInput) {
+          this.$.addEmailBtn.classList.add('shake-no');
+          setTimeout(function(){
+            this.$.addEmailBtn.classList.remove('shake-no');
+          }.bind(this), 900);
+        } else {
+          this.userData = emailInput;         
+          if(window.firebase.User) {
+            var user = firebase.auth().currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                user.email, 
+                userProvidedPassword //TODO: add password prompt for email change
+            );
+            user.reauthenticate(credential).then(function() {
+              user.updateEmail(emailInput)
+              .then(function(resp) {
+                console.log('successful', resp);
+                // Now sync up the user's db record
+                this.$.updateUser.saveValue('/users/' + this.uid, 'email')
+                .then(function(resp) {
+                  this.userEmail = emailInput;
+                  emailInput = '';
+                  this.addingEmail = false;
+                }.bind(this));
+              }).catch(function(error) {
+                console.log('error', error);
+                // An error happened.
+              });
+            });
+          }
+        }
+      }
+      changePass() {
+        window.dispatchEvent(new CustomEvent('sendPassReset', {bubbles: true, composed: true}));
+      }
+      viewBillingInfo() {
+
       }
       logout(){
         // By default, custom events stop at shadow DOM boundaries
         // To bypass this you have to set the `composed` flag to true
         window.dispatchEvent(new CustomEvent('logout', {bubbles: true, composed: true}));
       }
+      // _hideInputs(e) {
+      //   debugger;
+      //   if (e.target.id != "addNameBtn" || e.target.id != "addEmailBtn") {
+      //     this.addingEmail = false;
+      //     this.addingName = false;
+      //   }
+      // }
     }
 
     window.customElements.define(AccountView.is, AccountView);

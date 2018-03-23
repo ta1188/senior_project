@@ -139,7 +139,7 @@
         text-align: center;
         width: 100%;
       }
-      *[hidden] {
+      [hidden] {
         display: none !important;
       }
       .errMsg {
@@ -241,10 +241,12 @@
       connectedCallback() {
         super.connectedCallback();
         window.addEventListener('logout', this._logout.bind(this));
+        window.addEventListener('sendPassReset', this.sendPasswordReset.bind(this));
       }
       disconnectedCallback() {
         super.disconnectedCallback();
         window.removeEventListener('logout', this._logout.bind(this));
+        window.removeEventListener('sendPassReset', this.sendPasswordReset.bind(this));
       }
       handleError() {
         this.errMsg = "There was a problem, please try again";
@@ -295,17 +297,26 @@
       }
       sendPasswordReset() {
         debugger;
-        if (!this.$.email.value) {
+        var userEmail = window.app.user.email;
+        if (!this.$.email.value && !userEmail) {
           this.errMsg = "Invalid Email";
           this.showErr();
-        }
-        this.$.auth.sendPasswordResetEmail(this.$.email.value).then(function(resp){
-          console.log(resp);
-          this.clearForm();
-        }).catch(function(err){
-          this.errMsg = err.message;
-          this.showErr();
-        }.bind(this));
+          this.$.auth.sendPasswordResetEmail(this.$.email.value).then(function(resp){
+            console.log(resp);
+            window.setToast('Password reset email sent', null, null, true);
+            this.clearForm();
+          }).catch(function(err){
+            this.errMsg = err.message;
+            this.showErr();
+          }.bind(this));
+        } else if (userEmail) {
+          this.$.auth.sendPasswordResetEmail(userEmail).then(function(resp){
+            console.log(resp);
+            window.setToast('Password reset email sent', null, null, true);
+          }).catch(function(err){
+            window.setToast(err.message);
+          }.bind(this));
+        }        
       }
       registerNew() {
         if (!this.$.email.value || !this.$.password.value) {
@@ -343,6 +354,7 @@
         } else {
           if (window.location.pathname) {
             window.redirectPath = window.location.pathname;
+            if (window.redirectPath === '/login') path = 'store'; // Default redirect
           }
           window.history.pushState({}, null, 'login');
           window.dispatchEvent(new CustomEvent ('location-changed'));

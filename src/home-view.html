@@ -50,6 +50,23 @@
         width: 36px;
         height: 36px;
       }
+      .scanCircle {
+        padding: 10px;
+        position: absolute;
+        bottom: 35px;
+        width: 45px;
+        left: 0;
+        right: 0;
+        margin: auto;
+        border-radius: 50%;
+        border: 3px solid white;
+        background: linear-gradient(180deg, rgba(58, 131, 124, 0.8) 0%, rgba(255, 255, 255, 0) 100%), #3A837C;
+        box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+      }
+      .scanCircle img {
+        width: 45px;
+        height: 45px;
+      }
       .footer-nav a {
         padding: 0 20px;
         justify-self: center;
@@ -100,6 +117,9 @@
         text-decoration: none;
         color: #d0d037
       }
+      [hidden] {
+        display: none !important;
+      }
     </style>
     <firebase-app
       auth-domain="mbl-checkout.firebaseapp.com"
@@ -140,7 +160,7 @@
           <account-view name="account" user="{{user}}"></account-view>
           <cart-view name="cart"></cart-view>
           <checkout-view name="checkout"></checkout-view>
-          <scanner-view name="scanner"></scanner-view>
+          <scanner-view name="scanner" active="{{scannerActive}}"></scanner-view>
           <store-view name="store"></store-view>
           <lists-view name="lists" user="{{user}}" list-key="{{listKey}}" list-items="{{listItems}}"></lists-view>
           <list-view name="list" user="{{user}}" list-key="[[listKey]]" list-items="{{listItems}}"></list-view>
@@ -158,6 +178,11 @@
       <a name="store" href="store">
         <img src="../assets/store_24px.svg" alt="Stores" />
       </a>
+      <a name="scanner" href="scanner" hidden="[[!withinRange]]">
+        <div class="scanCircle">
+          <img src="../assets/barcode.svg" alt="Scanner" />
+        </div>
+      </a>
       <a name="receipts" href="receipts">
         <img src="../assets/receipt_24px.svg" alt="Receipts Lists" />
       </a>
@@ -165,7 +190,7 @@
         <img src="../assets/list_24px.svg" alt="Shopping Lists" />
       </a>
     </div>
-    <paper-toast class="flex-row" id="toast" text="Hello world!"><a class="undo-link" href="" on-click="fireCallBack">UNDO</a></paper-toast>
+    <paper-toast class="flex-row" id="toast" text="Hello world!"><a hidden="hideToastBtn" class="undo-link" href="" on-click="fireCallBack">UNDO</a></paper-toast>
   </template>
 
   <script>
@@ -211,6 +236,14 @@
             type: Array,
             notify: true
           },
+          withinRange: {
+            type: Boolean,
+            value: true
+          },
+          scannerActive: {
+            type: Boolean,
+            value: false
+          },
           routeData: Object,
           subroute: String,
         };
@@ -225,6 +258,13 @@
       }
       connectedCallback() {
         super.connectedCallback();
+        console.log('callback, ....about to attempt SW register');
+        
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('../service-worker.js').then(function(){
+            console.log('SW Registered');
+          })
+        }
         if (!window.setBannerLabel) {
           window.setBannerLabel = function(label, returnToLists) {
             this.bannerLabel = label;
@@ -232,15 +272,52 @@
           }.bind(this);
         }
         if (!window.setToast) {
-          window.setToast = function(text, callBackText, itemId) {
+          window.setToast = function(text, callBackText, itemId, _hideToastBtn = false) {
             this.callBackText = callBackText;
             this.itemId = itemId;
             this.$.toast.text = text;
+            this.hideToastBtn = _hideToastBtn;
             this.$.toast.open();
           }.bind(this);
         }
+        if (navigator.geolocation) {
+          console.log('Geolocation available');
+          
+          // this.watchID = navigator.geolocation.getCurrentPosition(function(position) {
+            navigator.geolocation.watchPosition(this._locationSuccess.bind(this), this._locationError, { enableHighAccuracy: true, maximumAge: 50000, timeout: 50000});
+        } else {
+          console.log('Geolocation not available');
+        }
+        
       }
-      
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        navigator.geolocation.clearWatch(this.watchID);
+      }
+      _locationSuccess(position) {
+        if (position.coords.latitude && position.coords.longitude) {
+          window.setToast('We found your location!');
+          // TODO: Add some sort of check to see if long/lat are within range
+          console.log(position.coords.latitude);
+          console.log(position.coords.longitude);
+          // after some sort of check...
+          this.withinRange = true;       
+          // else false...   
+        }
+      }
+      _locationError(err) {
+        console.log("Error:", err);
+        window.setToast('Error:' + err);
+        if(err.code == 1) {
+          console.log("Error: Access is denied!", err);
+        }
+        else if( err.code == 2) {
+          console.log("Error: Position is unavailable!", err);
+        }
+        else if( err.code == 3) {
+          window.setToast('We\'re having trouble finding your location');
+        }
+      }
       fireCallBack() {
         window.dispatchEvent(new CustomEvent(this.callBackText, {bubbles: true, composed: true, detail: {itemId: this.itemId}}));
       }
@@ -271,6 +348,10 @@
         if (!page) return;
         if (page.substr()[0] === '/') page = page.substr(1);         
         this._updateBanner(page);
+        if (page === 'scanner'){ this.scannerActive = true;
+        } else {
+          this.scannerActive = false;
+        }
         this.page = window.app.user ? page : 'login';
       }
 
@@ -278,6 +359,7 @@
         if (page === 'lists') window.setBannerLabel('Shopping Lists');
         if (page === 'receipts') window.setBannerLabel('Receipts');
         if (page === 'account') window.setBannerLabel('Account');
+        if (page === 'scanner') window.setBannerLabel('Return');
       }
 
       _showPage404() {
