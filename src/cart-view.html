@@ -6,8 +6,23 @@
       :host {
         display: block;
       }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .flex-row * {
+        align-self: center;
+      }
     </style>
     <p>Hello [[prop1]]!</p>
+    <template id="cartItems" is="dom-repeat" items="[[scannedItems]]" restamp>
+      <div class="flex-row">
+        <span><b>Code: </b>[[item.code]]</span>
+        <span><b>Format: </b>[[item.format]]</span>
+      </div>
+    </template>
+    <button on-click="showItems">Show Item</button>
   </template>
 
   <script>
@@ -22,8 +37,17 @@
           prop1: {
             type: String,
             value: 'cart-view'
+          },
+          scannedItems: {
+            type: Array,
+            value: function() { return window.scannedItems || []; },
           }
         };
+      }
+      showItems() {
+        console.log('updating scanned items array');
+        this.scannedItems = [];
+        this.scannedItems = window.scannedItems.slice();
       }
     }
 

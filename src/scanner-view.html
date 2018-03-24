@@ -13,8 +13,8 @@
       }
       canvas.drawing, canvas.drawingBuffer {
         position: absolute;
-        left: 0;
-        top: 0;
+        left: 25px;
+        top: 55px;
       }
     </style>
     <p>Hello [[prop1]]!</p>
@@ -62,6 +62,7 @@
         }
       }
       initQuagga() {
+        this.clearOutlines();
         Quagga.init({
             inputStream : {
               type : "LiveStream",
@@ -121,7 +122,7 @@
               Quagga.start();
           }.bind(this));
 
-          Quagga.onProcessed(function(result){
+          Quagga.onProcessed(function(result){ // TODO: Debounce this function...
             if (result){
               var drawingCtx = Quagga.canvas.ctx.overlay,
                 drawingCanvas = Quagga.canvas.dom.overlay;
@@ -141,17 +142,29 @@
 
               if (result.codeResult && result.codeResult.code) {
                 Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: '#e53935', lineWidth: 3 });
-                if (!window.scannedItems) window.scannedItems = [];
-                window.scannedItems.push({
-                  code: result.codeResult.code, 
-                  format: result.codeResult.format, 
-                })
-                window.setToast('Successfully Scanned');
-                window.history.pushState({}, null, 'cart');
-                window.dispatchEvent(new CustomEvent ('location-changed'));
+                if (result.codeResult.format === 'ean_13') {
+                  if (!window.scannedItems) window.scannedItems = [];
+                  
+                  window.setToast('Successfully Scanned');
+                  window.scannedItems.push({
+                    code: result.codeResult.code, 
+                    format: result.codeResult.format, 
+                  })
+                  window.history.pushState({}, null, 'cart');
+                  window.dispatchEvent(new CustomEvent ('location-changed'));
+                }
               }
             }
           });
+      }
+
+      clearOutlines(){
+        Array.prototype.forEach.call(this.$.scanContainer.querySelectorAll('canvas'), function( node ) {
+          node.parentNode.removeChild( node );
+        });
+        Array.prototype.forEach.call(this.$.scanContainer.querySelectorAll('br[clear]'), function( node ) {
+          node.parentNode.removeChild( node );
+        });
       }
     }
 
