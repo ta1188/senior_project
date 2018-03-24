@@ -366,13 +366,15 @@
         return (_page === "login") ? 'login-view' : '';
       }
       _postLoginUpdate() {
-        if (navigator.geolocation) {
-          console.log('Geolocation available');
-          
-          // this.watchID = navigator.geolocation.getCurrentPosition(function(position) {
-            navigator.geolocation.watchPosition(this._locationSuccess.bind(this), this._locationError, { enableHighAccuracy: true, maximumAge: 50000, timeout: 50000});
-        } else {
-          console.log('Geolocation not available');
+        if (this.user){
+          if (navigator.geolocation) {
+            console.log('Geolocation available');
+            
+            // this.watchID = navigator.geolocation.getCurrentPosition(function(position) {
+              navigator.geolocation.watchPosition(this._locationSuccess.bind(this), this._locationError, { enableHighAccuracy: true, maximumAge: 50000, timeout: 50000});
+          } else {
+            console.log('Geolocation not available');
+          }
         }
       }
     }

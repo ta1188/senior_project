@@ -11,6 +11,11 @@
         height: 70vh;
         width: 100%;
       }
+      canvas.drawing, canvas.drawingBuffer {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
     </style>
     <p>Hello [[prop1]]!</p>
     <div id="scanContainer" class="scanner-view"></div>
@@ -30,6 +35,10 @@
             value: false,
             observer: 'test'
           },
+          initializedQuagga: {
+            type: Boolean,
+            value: false
+          },
           prop1: {
             type: String,
             value: 'scanner-view'
@@ -46,11 +55,10 @@
       test(_active) {
         if (!window.Quagga) return console.log('no quagga...'); 
         if (this.active) {
-          debugger;
           console.log('changing "active"', this.active);
           this.initQuagga();
         } else {
-          Quagga.stop();
+          if (this.initializedQuagga) Quagga.stop();
         }
       }
       initQuagga() {
@@ -71,10 +79,12 @@
             numOfWorkers: (navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4),
             locate: true,
             decoder : {
+              patchSize: "medium",
+              halfSample: true,
               readers: [
+                "ean_8_reader",
                 "code_128_reader",
                 "ean_reader",
-                "ean_8_reader",
                 "code_39_reader",
                 "code_39_vin_reader",
                 "codabar_reader",
@@ -83,6 +93,10 @@
                 "i2of5_reader"
               ],
               debug: {
+                drawBoundingBox: true,
+                drawScanline: true,
+                showPattern: true,
+                showFrequency: true,
                 showCanvas: true,
                 showPatches: true,
                 showFoundPatches: true,
@@ -103,16 +117,40 @@
                   return
               }
               console.log("Initialization finished. Ready to start");
+              this.initializedQuagga = true;
               Quagga.start();
           }.bind(this));
 
-          Quagga.onDetected(function(result){
-            window.setToast('detected result: ' + result);
-            console.log('result: ', result);
-          });
           Quagga.onProcessed(function(result){
-            window.setToast('processed result: ' + result);
-            console.log('result: ', result);
+            if (result){
+              var drawingCtx = Quagga.canvas.ctx.overlay,
+                drawingCanvas = Quagga.canvas.dom.overlay;
+
+              if (result.boxes) {
+                drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                result.boxes.filter(function (box) {
+                    return box !== result.box;
+                }).forEach(function (box) {
+                    Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "#76ff03", lineWidth: 2 });
+                });
+              }
+
+              if (result.box) {
+                Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "#76ff03", lineWidth: 2 });
+              }
+
+              if (result.codeResult && result.codeResult.code) {
+                Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: '#e53935', lineWidth: 3 });
+                if (!window.scannedItems) window.scannedItems = [];
+                window.scannedItems.push({
+                  code: result.codeResult.code, 
+                  format: result.codeResult.format, 
+                })
+                window.setToast('Successfully Scanned');
+                window.history.pushState({}, null, 'cart');
+                window.dispatchEvent(new CustomEvent ('location-changed'));
+              }
+            }
           });
       }
     }
