@@ -345,6 +345,7 @@
 
         if(this.signedIn) {
           var path = window.redirectPath || 'store';
+          if (path === '/') path = 'store';
           if (path === '/login') path = 'store'; // Default redirect
           if (path === '/list') path = 'lists'; // Prevent single list return
           if (path === '/receipt') path = 'receipts'; // Prevent single receipt return
