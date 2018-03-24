@@ -13,7 +13,7 @@
       }
     </style>
     <p>Hello [[prop1]]!</p>
-    <div id="scanna" class="scanner-view"></div>
+    <div id="scanContainer" class="scanner-view"></div>
   </template>
 
   <script>
@@ -30,10 +30,6 @@
             value: false,
             observer: 'test'
           },
-          quaggaReady: {
-            type: Boolean,
-            value: false
-          },
           prop1: {
             type: String,
             value: 'scanner-view'
@@ -42,31 +38,26 @@
       }
       connectedCallback () {
         super.connectedCallback();
-        if (window.Quagga) {
-          debugger;
-          this.initQuagga();
-        } else {
-          console.log('what the heck is quagga??');
-        }
+        if (!window.Quagga) console.log('what the heck is quagga??');
       }
       disconnectedCallback () {
         // measure something
       }
       test(_active) {
-        if (window.Quagga && this.quaggaReady) {
+        if (!window.Quagga) return console.log('no quagga...'); 
+        if (this.active) {
           debugger;
-          console.log('changing "active"', _active);
-          _active ? Quagga.start() : Quagga.stop();
-        } else {
+          console.log('changing "active"', this.active);
           this.initQuagga();
+        } else {
+          Quagga.stop();
         }
       }
       initQuagga() {
         Quagga.init({
             inputStream : {
-              name : "Live",
               type : "LiveStream",
-              target: this.$.scanna,
+              target: this.$.scanContainer,
               constraints: {
                 width: window.screen.width - 40,
                 height: window.screen.height - 210,
@@ -80,7 +71,31 @@
             numOfWorkers: (navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4),
             locate: true,
             decoder : {
-              readers : ["code_128_reader"]
+              readers: [
+                "code_128_reader",
+                "ean_reader",
+                "ean_8_reader",
+                "code_39_reader",
+                "code_39_vin_reader",
+                "codabar_reader",
+                "upc_reader",
+                "upc_e_reader",
+                "i2of5_reader"
+              ],
+              debug: {
+                showCanvas: true,
+                showPatches: true,
+                showFoundPatches: true,
+                showSkeleton: true,
+                showLabels: true,
+                showPatchLabels: true,
+                showRemainingPatchLabels: true,
+                boxFromPatches: {
+                    showTransformed: true,
+                    showTransformedBox: true,
+                    showBB: true
+                }
+              }
             }
           }, function(err) {
               if (err) {
@@ -88,12 +103,15 @@
                   return
               }
               console.log("Initialization finished. Ready to start");
-              // Quagga.start();
-              this.quaggaReady = true;
+              Quagga.start();
           }.bind(this));
 
           Quagga.onDetected(function(result){
-            window.setToast('result: ' + result);
+            window.setToast('detected result: ' + result);
+            console.log('result: ', result);
+          });
+          Quagga.onProcessed(function(result){
+            window.setToast('processed result: ' + result);
             console.log('result: ', result);
           });
       }

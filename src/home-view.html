@@ -213,7 +213,8 @@
           },
           user: {
             type: Object,
-            notify: true
+            notify: true, 
+            observer: '_postLoginUpdate'
           },
           page: {
             type: String,
@@ -280,15 +281,6 @@
             this.$.toast.open();
           }.bind(this);
         }
-        if (navigator.geolocation) {
-          console.log('Geolocation available');
-          
-          // this.watchID = navigator.geolocation.getCurrentPosition(function(position) {
-            navigator.geolocation.watchPosition(this._locationSuccess.bind(this), this._locationError, { enableHighAccuracy: true, maximumAge: 50000, timeout: 50000});
-        } else {
-          console.log('Geolocation not available');
-        }
-        
       }
       disconnectedCallback() {
         super.disconnectedCallback();
@@ -296,7 +288,7 @@
       }
       _locationSuccess(position) {
         if (position.coords.latitude && position.coords.longitude) {
-          window.setToast('We found your location!');
+          // window.setToast('We found your location!');
           // TODO: Add some sort of check to see if long/lat are within range
           console.log(position.coords.latitude);
           console.log(position.coords.longitude);
@@ -372,6 +364,16 @@
       }
       _isLogin(_page) {
         return (_page === "login") ? 'login-view' : '';
+      }
+      _postLoginUpdate() {
+        if (navigator.geolocation) {
+          console.log('Geolocation available');
+          
+          // this.watchID = navigator.geolocation.getCurrentPosition(function(position) {
+            navigator.geolocation.watchPosition(this._locationSuccess.bind(this), this._locationError, { enableHighAccuracy: true, maximumAge: 50000, timeout: 50000});
+        } else {
+          console.log('Geolocation not available');
+        }
       }
     }
     window.customElements.define(HomeView.is, HomeView);
