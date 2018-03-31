@@ -25,9 +25,12 @@
       .flex-column * {
         font-size: 14px;
       }
-      .flex-column button {
+      .action-btn {
         color: #828282;
         align-self: start;
+        background-color: transparent;
+        border: none;
+        outline: none;
       }
       .flex-column span {
         align-self: flex-start;
@@ -53,6 +56,8 @@
         font-weight: bold;
         font-size: 16px;
         color: #FFFFFF;
+        font-family: Verdana, Geneva, sans-serif;
+        border: none;
       }
       .shake-no {
         animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
@@ -121,7 +126,7 @@
         <path d="M0 0h24v24H0z" fill="none"/>
       </svg>
       <div class="flex-start flex-column" hidden="[[addingName]]">
-        <button on-click="changeName">[[nameActionLabel]] Name</button>
+        <button class="action-btn" on-click="changeName">[[nameActionLabel]] Name</button>
         <span hidden="[[!userName]]">[[userName]]</span>
       </div>
       <div class="flex-start flex-row space-between" hidden="[[!addingName]]">
@@ -135,7 +140,7 @@
         <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
       </svg>
       <div class="flex-start flex-column" hidden="[[addingEmail]]">
-          <button on-click="changeEmail">Email</button>
+          <button class="action-btn" on-click="changeEmail">Email</button>
           <span hidden="[[!userEmail]]">[[userEmail]]</span>
       </div>
       <div class="flex-start flex-row space-between" hidden="[[!addingEmail]]">
@@ -148,7 +153,7 @@
         <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6zM18 20H6V10h12v10z"/>
       </svg>
       <div class="flex-start flex-column">
-        <button on-click="changePass">Send Password Reset Email</button>
+        <button class="action-btn" on-click="changePass">Send Password Reset Email</button>
       </div>
     </div>
     <div class="flex-start flex-row margin-bottom">
@@ -157,7 +162,7 @@
         <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
       </svg>
       <div class="flex-start flex-column">
-        <button on-click="viewBillingInfo">Billing Information</button>
+        <button class="action-btn" on-click="viewBillingInfo">Billing Information</button>
       </div>
     </div>
     <button class="logout-btn" on-click="logout">LOGOUT</button>
@@ -196,6 +201,7 @@
         }
       }
       changeName() {
+        this.addingEmail = false;
         this.addingName = true;
         this.$.nameInput.focus();
         // this.userData = {
@@ -232,6 +238,7 @@
         }
       }
       changeEmail() {
+        this.addingName = false;
         this.addingEmail = true;
         this.$.emailInput.focus();
       }

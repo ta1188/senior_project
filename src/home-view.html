@@ -62,10 +62,29 @@
         border: 3px solid white;
         background: linear-gradient(180deg, rgba(58, 131, 124, 0.8) 0%, rgba(255, 255, 255, 0) 100%), #3A837C;
         box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+        z-index: 100;
       }
       .scanCircle img {
         width: 45px;
         height: 45px;
+      }
+      .cart-icon-container {
+        padding: 5px;
+        background-color: #FBB782;
+        position: absolute; 
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+        right: 20px;
+        top: 48px;
+        z-index: 100;
+      }
+      .cart-icon-container img {
+        width: 30px;
+        height: 30px;
+        position: relative;
+        top: 3px;
+        left: 1px;
       }
       .footer-nav a {
         padding: 0 20px;
@@ -120,6 +139,9 @@
       [hidden] {
         display: none !important;
       }
+      .grey-background {
+        background-color: #F2F2F2;
+      }
     </style>
     <firebase-app
       auth-domain="mbl-checkout.firebaseapp.com"
@@ -142,7 +164,7 @@
     <!-- <app-route route="{{route}}" pattern="/four-oh-four"></app-route> -->
 
       <div id="bannerLabel" class$="nav-bar header-nav [[_hideOnLogin(page)]]">
-        <a hidden="[[hideListsReturn]]" href="/lists" class="bannerLink">
+        <a hidden="[[hideListsReturn]]" href="[[returnPath]]" class="bannerLink">
           <div class="flex-row flex-start">
             <svg class="arrow-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
               <path d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"/>
@@ -152,20 +174,23 @@
           </div>
         </a>
         <h2 hidden="[[!hideListsReturn]]">[[bannerLabel]]</h2>
+        <div class="cart-icon-container" on-click="moveToCart">
+          <img src="../assets/shopping_cart_24px.svg" alt="Account" />
+        </div>
       </div> 
-      <div class$="main-content [[_isLogin(page)]]">
+      <div id="mainContent" class$="main-content [[_isLogin(page)]]">
         <!-- iron-pages selects the view based on the active route -->
         <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="four-oh-four">
           <login-view name="login" user="{{user}}"></login-view>
           <account-view name="account" user="{{user}}"></account-view>
-          <cart-view name="cart"></cart-view>
+          <cart-view name="cart" scanned-items="{{scannedItems}}"></cart-view>
           <checkout-view name="checkout"></checkout-view>
-          <scanner-view name="scanner" active="{{scannerActive}}"></scanner-view>
+          <scanner-view name="scanner" active="{{scannerActive}}" scanned-items="{{scannedItems}}"></scanner-view>
           <store-view name="store"></store-view>
           <lists-view name="lists" user="{{user}}" list-key="{{listKey}}" list-items="{{listItems}}"></lists-view>
           <list-view name="list" user="{{user}}" list-key="[[listKey]]" list-items="{{listItems}}"></list-view>
-          <receipts-view name="receipts" user="{{user}}"></receipts-view>
-          <receipt-view name="receipt"></receipt-view>
+          <receipts-view name="receipts" user="{{user}}" selected-receipt="{{selectedReceipt}}"></receipts-view>
+          <receipt-view name="receipt" selected-receipt="{{selectedReceipt}}"></receipt-view>
     
           <four-oh-four-view name="four-oh-four"></four-oh-four-view>
         </iron-pages>
@@ -190,7 +215,7 @@
         <img src="../assets/list_24px.svg" alt="Shopping Lists" />
       </a>
     </div>
-    <paper-toast class="flex-row" id="toast" text="Hello world!"><a hidden="hideToastBtn" class="undo-link" href="" on-click="fireCallBack">UNDO</a></paper-toast>
+    <paper-toast class="flex-row" id="toast" text="Hello world!"><a hidden="[[hideToastBtn]]" class="undo-link" href="" on-click="fireCallBack">UNDO</a></paper-toast>
   </template>
 
   <script>
@@ -245,6 +270,14 @@
             type: Boolean,
             value: false
           },
+          scannedItems: {
+            type: Array,
+            notify: true
+          },
+          selectedReceipt: {
+            type: Object,
+            notify: true
+          },
           routeData: Object,
           subroute: String,
         };
@@ -267,13 +300,14 @@
           })
         }
         if (!window.setBannerLabel) {
-          window.setBannerLabel = function(label, returnToLists) {
+          window.setBannerLabel = function(label, returnToLists, returnPath) {
             this.bannerLabel = label;
-            if (returnToLists) this.hideListsReturn = false;
+            this.returnPath = returnPath;
+            this.hideListsReturn = returnToLists ? false : true;
           }.bind(this);
         }
         if (!window.setToast) {
-          window.setToast = function(text, callBackText, itemId, _hideToastBtn = false) {
+          window.setToast = function(text, callBackText, itemId, _hideToastBtn = true) {
             this.callBackText = callBackText;
             this.itemId = itemId;
             this.$.toast.text = text;
@@ -349,9 +383,15 @@
 
       _updateBanner(page) {
         if (page === 'lists') window.setBannerLabel('Shopping Lists');
+        if (page === 'store') window.setBannerLabel('Stores');
         if (page === 'receipts') window.setBannerLabel('Receipts');
+        if (page === 'receipt') {
+          this.$.mainContent.classList.add('grey-background');
+        } else {
+          this.$.mainContent.classList.remove('grey-background');
+        }
         if (page === 'account') window.setBannerLabel('Account');
-        if (page === 'scanner') window.setBannerLabel('Return');
+        if (page === 'scanner') window.setBannerLabel('');
       }
 
       _showPage404() {
@@ -376,6 +416,10 @@
             console.log('Geolocation not available');
           }
         }
+      }
+      moveToCart(){
+        window.history.pushState({}, null, 'cart');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
       }
     }
     window.customElements.define(HomeView.is, HomeView);

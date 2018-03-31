@@ -41,16 +41,16 @@ self.addEventListener('activate', function(){
   // Not automatically activated
   console.log('SW activated');
 });
-self.addEventListener('fetch', function(event){
-  // Use this as a network proxy to prevent default network fetch
-  caches.match(event.request)
-  .then(function(res){
-    if (res) {
-      // If you have the resource in the cache, return it
-      return res;
-    } else {
-      // Otherwise fetch the resource
-      return fetch(event.request);
-    }
-  })
-});
+// self.addEventListener('fetch', function(event){
+//   // Use this as a network proxy to prevent default network fetch
+//   caches.match(event.request)
+//   .then(function(res){
+//     if (res) {
+//       // If you have the resource in the cache, return it
+//       return res;
+//     } else {
+//       // Otherwise fetch the resource
+//       return fetch(event.request);
+//     }
+//   })
+// });

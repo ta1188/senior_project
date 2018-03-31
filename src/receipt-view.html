@@ -5,11 +5,89 @@
     <style>
       :host {
         display: block;
+        margin-top: 25px;
+      }
+      h2 {
+        margin: 0;
+        padding: 0;
+      }
+      .margin-top {
+        margin-top: 15px;
+      }
+      .smaller-font {
+        font-size: 10pt;
+      }
+      .receipt-container {
+        padding: 10px;
+        height: calc(80vh - 100px);
+        background-color: #ffffff;
+        background: linear-gradient(-135deg, #ffffff 11px, transparent 0) 0 11px, linear-gradient(135deg, #ffffff 11px, #f2f2f2 0) 0 11px;
+        background-color: #ffffff;
+        background-position: left 101% !important;
+        background-repeat: repeat-x !important;
+        background-size: 20px 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .flex-row * {
+        align-self: center;
+      }
+      .grey {
+        color: #BDBDBD;
+      }
+      .store-id {
+        font-size: 10pt;
+      }
+      .summary-container {
+        width: 55%;
+        justify-content: flex-end;
+      }
+      .spacer {
+        flex: 1;
       }
     </style>
-    <p>Hello [[prop1]]!</p>
+    <div class="receipt-container">
+      <div class="flex-row">
+        <h2 class="list-label">[[selectedReceipt.storeName]]</h2>
+        <span class="grey smaller-font">[[selectedReceipt.date]]</span>
+      </div>
+      <div class="flex-row">
+        <span class="grey store-id">ST# [[selectedReceipt.storeId]]</span>
+        <span class="grey smaller-font">[[selectedReceipt.storeLocation]]</span>
+      </div>
+      <template id="repeater" is="dom-repeat" items="[[itemsArr]]">
+        <div class="flex-row margin-top">
+          <span>[[item.itemLabel]]</span>
+          <span>[[item.unitPrice]]</span>
+        </div>
+      </template>
+      <div class="flex-row margin-top">
+        <div class="spacer"></div>
+        <div class="summary-container">
+          <div class="flex-row">
+            <h4>Subtotal</h4>
+            <span>[[selectedReceipt.subTotal]]</span>
+          </div>
+          <template is="dom-repeat" items="[[taxArr]]">
+            <div class="flex-row">
+              <span><b>Tax </b>[[item.taxPercent]] %</span>
+              <span>[[item.taxCost]]</span>
+            </div>
+          </template>
+          <div class="flex-row">
+            <h2>Total</h2>
+            <h4>[[selectedReceipt.total]]</h4>
+          </div>
+        </div>
+      </div>        
+      <div class="smaller-font">Confirmation # [[selectedReceipt.confirmationNum]]</div>
+    </div>
   </template>
-
   <script>
     /**
      * @customElement
@@ -22,8 +100,26 @@
           prop1: {
             type: String,
             value: 'receipt-view'
-          }
+          },
+          selectedReceipt: {
+            type: Object,
+            observer: 'tester'
+          },
+          itemsArr: Array,
+          taxArr: Array
         };
+      }
+      tester(receipt) {
+        console.log('your receipt', this.selectedReceipt);
+        this.itemsArr = Object.keys(receipt.items).map(function(key) {
+          receipt.items[key].unitPrice = receipt.items[key].unitPrice.toFixed(2);
+          return receipt.items[key];
+        });
+        this.taxArr = Object.keys(receipt.tax).map(function(key) {
+          receipt.tax[key].taxPercent = receipt.tax[key].taxPercent.toFixed(2);
+          receipt.tax[key].taxCost = receipt.tax[key].taxCost.toFixed(2);
+          return receipt.tax[key];
+        });
       }
     }
 

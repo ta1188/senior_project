@@ -8,6 +8,7 @@
     <style>
       :host {
         display: block;
+        margin-top: 25px;
       }
       .flex-row {
         display: flex;
@@ -47,7 +48,7 @@
         cursor: pointer;
       }
       .item-container {
-        margin-bottom: 10px;
+        margin-bottom: 20px;
       }
       #addListInput {
         font-family: Verdana, Geneva, sans-serif;
@@ -97,7 +98,6 @@
                     equal-to="{{uid}}" 
                     data="{{listData}}"></firebase-query>
     <firebase-document id="newList" path="/shopLists/" data="{{newListData}}"></firebase-document>
-    <p>Hello [[prop1]]!</p>
     <template id="repeater" is="dom-repeat" items="[[items]]">
       <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
         <div class="flex-row">
@@ -128,9 +128,9 @@
       static get is() { return 'lists-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'lists-view'
+          items: {
+            type: Array,
+            value: []
           },
           listData: {
             type: Object,
@@ -206,7 +206,7 @@
         } 
       }
       transitionPage() {
-        window.setBannerLabel(this.listName, true);
+        window.setBannerLabel(this.listName, true, '/lists');
         window.history.pushState({}, null, 'list');
         window.dispatchEvent(new CustomEvent ('location-changed'));
       }
@@ -215,17 +215,15 @@
         if (event) {
           var _index;
           var list = this.items.filter(function(item, index) {
-            if (item.$key === this.listKey) {
+          if (item.$key === this.listKey) {
               _index = index;
               return item;
             }
           }.bind(this));
-          var temp = this.listData;
-          this.listData = [];
+          var temp = this.items;
           temp[_index] = list[0];
-          temp[_index].listLength = event.detail.length;
-          // this.items = temp;
-          this.set('items', temp);
+          temp[_index].itemsLength = event.detail.length;
+          this.items = temp.slice();
           // this.$.repeater.render();
           // this._updateLists();
         }
@@ -257,9 +255,10 @@
       }
       _updateLists(event) {
         if (event) {
-          this.listData = this.listData.slice();
+          
+          // this.listData = this.listData.slice();
           // this.listData = event.detail.itemsArr;
-          // this.
+          this.items = 
           console.log('updating', this.listData);
           // console.log('updating', event.detail.itemsArr);
           // this.notifyPath('listData');

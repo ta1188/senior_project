@@ -5,6 +5,7 @@
     <style>
       :host {
         display: block;
+        margin-top: 25px;
       }
       .flex-row {
         display: flex;
@@ -14,15 +15,60 @@
       .flex-row * {
         align-self: center;
       }
+      .default-msg {
+        margin-top: 10px;
+        color: #BDBDBD;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .summary-container {
+        width: 50%;
+        float: right;
+      }
+      .checkout-btn {
+        font-family: Verdana, Geneva, sans-serif;
+        margin-top: 10px;
+        width: 100%;
+        padding: 10px;
+        background: #FBB782;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        color: #FFFFFF;
+        border: 3px solid white;    
+        font-size: 18pt;
+        letter-spacing: 1px;    
+      }
     </style>
-    <p>Hello [[prop1]]!</p>
-    <template id="cartItems" is="dom-repeat" items="[[scannedItems]]" restamp>
-      <div class="flex-row">
-        <span><b>Code: </b>[[item.code]]</span>
-        <span><b>Format: </b>[[item.format]]</span>
+    <p class="default-msg" hidden="[[!hideCartItems]]">No items in your cart</p>
+    <div hidden="[[hideCartItems]]">
+      <template id="cartItems" is="dom-repeat" items="[[items]]" restamp>
+        <div class="flex-row">
+          <div>
+            <span><b>Barcode: </b>[[item.code]] <br/>([[item.format]])</span>
+          </div>
+          <span>2.14</span>
+        </div>
+      </template>
+      <div class="summary-container">
+        <div class="flex-row">
+          <h4>Subtotal</h4>
+          <span>[[subTotal]]</span>
+        </div>
+        <template is="dom-repeat" items="[[taxBreakdown]]">
+          <div class="flex-row">
+            <span><b>Tax </b>[[item.tax]] %</span>
+            <span>[[item.cost]]</span>
+          </div>
+        </template>
+        <div class="flex-row">
+          <h2>Total</h2>
+          <h4>[[total]]</h4>
+        </div>
       </div>
-    </template>
-    <button on-click="showItems">Show Item</button>
+      <button class="checkout-btn" on-click="logout">Checkout</button>
+    </div>
+    <p class="default-msg"><i><b>Note:</b> Once connected to a store's database the barcode would be sent to their API which would return the basic product info associated with the item. For demo purpose a fixed price per item has been given.</i></p>
   </template>
 
   <script>
@@ -34,20 +80,75 @@
       static get is() { return 'cart-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'cart-view'
+          items: {
+            type: Array,
+            value: []
           },
           scannedItems: {
             type: Array,
-            value: function() { return window.scannedItems || []; },
+            notify: true
+          },
+          hideCartItems: {
+            type: Boolean,
+            notify: true
+          },
+          subTotal: {
+            type: Number,
+            value: 0.00
+          },
+          total: {
+            type: Number,
+            value: 0.00
+          },
+          taxes: {
+            type: Array,
+            value: [3, 2.4]
+          },
+          taxBreakdown: {
+            type: Array,
+            value: []
           }
         };
       }
-      showItems() {
-        console.log('updating scanned items array');
-        this.scannedItems = [];
-        this.scannedItems = window.scannedItems.slice();
+      static get observers() {
+        return [
+          'checkItems(scannedItems.splices)'
+        ]
+      }
+
+      checkItems(_items) {
+        console.log('change to scannedItems', _items);
+        if (_items && _items.indexSplices && _items.indexSplices[0].addedCount) {
+          this.hideCartItems = false;
+          this.push('items', _items.indexSplices[0].object[0]);
+          this.scannedItems = [];
+          // temp default value assignment
+          this.subTotal += 2.14;
+          this.updateTotals();
+        } else if (!this.items.length) {
+          this.hideCartItems = true;
+        }
+      }
+      updateTotals() {
+        if (this.items && this.items.length) {
+          var _taxBreakdown = [];
+          this.taxes.forEach(function(tax, index) {
+            console.log(index)
+            var taxCost = this.subTotal * ((tax / 100));
+            var taxCostTotal = this.subTotal * ((tax / 100) + 1);
+            if (index === 0) {
+              this.total = taxCostTotal;
+            } else {
+              this.total += taxCostTotal;
+            }
+            _taxBreakdown.push({
+              tax: tax.toFixed(2),
+              cost: taxCost.toFixed(2)
+            });
+          }.bind(this));
+          this.taxBreakdown = _taxBreakdown;
+          this.total = this.total.toFixed(2);
+        }
       }
     }
 

@@ -17,7 +17,6 @@
         top: 55px;
       }
     </style>
-    <p>Hello [[prop1]]!</p>
     <div id="scanContainer" class="scanner-view"></div>
   </template>
 
@@ -43,9 +42,10 @@
             type: Boolean,
             value: false
           },
-          prop1: {
-            type: String,
-            value: 'scanner-view'
+          scannedItems: {
+            type: Array,
+            value: [],
+            notify: true
           }
         };
       }
@@ -119,7 +119,7 @@
           }, function(err) {
               if (err) {
                   console.log(err);
-                  return
+                  return;
               }
               console.log("Initialization finished. Ready to start");
               this.initializedQuagga = true;
@@ -127,7 +127,7 @@
               Quagga.start();
           }.bind(this));
 
-          Quagga.onProcessed(function(result){ // TODO: Debounce this function...
+          Quagga.onProcessed(function(result){ 
             if (result){
               var drawingCtx = Quagga.canvas.ctx.overlay,
                 drawingCanvas = Quagga.canvas.dom.overlay;
@@ -148,20 +148,20 @@
               if (!this.hasScanned && result.codeResult && result.codeResult.code) {
                 Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: '#e53935', lineWidth: 3 });
                 if (result.codeResult.format === 'ean_13') {
-                  if (!window.scannedItems) window.scannedItems = [];
                   
                   window.setToast('Successfully Scanned');
-                  window.scannedItems.push({
-                    code: result.codeResult.code, 
-                    format: result.codeResult.format, 
-                  })
                   this.hasScanned = true;
+                  this.push('scannedItems', {
+                    code: result.codeResult.code, 
+                    format: result.codeResult.format
+                  });
+                  // window.dispatchEvent(new CustomEvent('scannedUpdated', {bubbles: true, composed: true}));
                   window.history.pushState({}, null, 'cart');
                   window.dispatchEvent(new CustomEvent ('location-changed'));
                 }
               }
             }
-          });
+          }.bind(this));
       }
 
       clearOutlines(){

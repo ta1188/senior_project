@@ -6,6 +6,26 @@
     <style>
       :host {
         display: block;
+        margin-top: 25px;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .flex-row * {
+        align-self: center;
+      }
+      .grey {
+        color: #BDBDBD;
+      }
+      .item-container {
+        margin-bottom: 20px;
+      }
+      .receipt-svg {
+        height: 30px;
+        width: 30px;
+        fill: #BDBDBD;
       }
     </style>
     <firebase-query id="receipts" 
@@ -14,7 +34,18 @@
                     equal-to="{{uid}}" 
                     data="{{receiptData}}"></firebase-query>
 
-    <p>Hello [[prop1]]!</p>
+    <template id="repeater" is="dom-repeat" items="[[items]]">
+      <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewReceipt">
+        <div class="flex-row">
+          <svg class="receipt-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"/>
+            <path d="M0 0h24v24H0z" fill="none"/>
+          </svg>
+          <span class="list-label">[[item.storeName]]</span>
+        </div>
+        <span class="grey">[[item.date]]</span>
+      </div>
+    </template>
   </template>
 
   <script>
@@ -26,10 +57,6 @@
       static get is() { return 'receipts-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'receipts-view'
-          },
           receiptData: {
             type: Object,
             observer: "checkReceipt"
@@ -37,6 +64,10 @@
           user: {
             type: Object,
             observer: "checkUser"
+          },
+          selectedReceipt: {
+            type: Object,
+            notify: true
           },
           uid: {
             type: String
@@ -53,8 +84,26 @@
       checkReceipt(_receipt) {
         if (window.app.user.uid && _receipt) {
           console.log('receipt: ', _receipt);
-          this.items = _receipt;
+          this.items = _receipt.map(function(item) {
+            item.date = new Date(item.date).toLocaleString('en-US', {month: 'short', day: 'numeric'});
+            return item;
+          });
         }
+      }
+      _viewReceipt(e) {
+        var localTarget = Polymer.dom(e).localTarget;
+        if (localTarget) {
+          var receiptId = localTarget.closest('.item-container').id;
+          var selectedReceipt = this.items.filter(receipt => receipt.$key === receiptId);
+          this.selectedReceipt = selectedReceipt[0];
+          console.log('selectedReceipt', this.selectedReceipt);
+          this.transitionPage(selectedReceipt[0].storeName);
+        } 
+      }
+      transitionPage(_storeName) {
+        window.setBannerLabel(_storeName, true, '/receipts');
+        window.history.pushState({}, null, 'receipt');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
       }
     }
 

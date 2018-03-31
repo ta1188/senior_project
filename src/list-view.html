@@ -9,6 +9,7 @@
       :host {
         display: block;
         height: 100%;
+        margin-top: 25px;
       }
       .flex-row {
         display: flex;
@@ -96,7 +97,6 @@
                     path="{{listItemsPath}}" 
                     data="{{listItemsData}}"></firebase-query>
     <firebase-document id="list" path="{{listPath}}" data="{{listData}}"></firebase-document>
-    <p>Hello [[prop1]]!</p>
     <div id="inputContainer" class="flex-row input-container">
       <svg class="plusImg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -117,10 +117,6 @@
       static get is() { return 'list-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'list-view'
-          },
           listItemsData: {
             type: Array,
             observer: "checkListItems"
@@ -193,7 +189,7 @@
         var _localTarget = Polymer.dom(e).localTarget;
         var divId = _localTarget.parentElement.id;
         var itemText = _localTarget.innerText; // Checkbox text
-        if (divId) window.setToast('Deleted ' + itemText, 'undoRemove', divId);
+        if (divId) window.setToast('Deleted ' + itemText, 'undoRemove', divId, false);
         _localTarget.classList.add('striked');
         _localTarget.disabled = true;
         setTimeout(function(){
@@ -235,8 +231,10 @@
         }
       }
       emmitLength() {
+        this.listItems = this.listItemsData;
+
         console.log('this.listItemsData.length', this.listItemsData.length);
-        window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length, itemsArr: this.listItemsData}}));
+        // window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length, itemsArr: this.listItemsData}}));
       }
     }
 
