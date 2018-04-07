@@ -15,6 +15,12 @@
       .flex-row * {
         align-self: center;
       }
+      .grey-fill {
+        fill: #BDBDBD;
+      }
+      .trash {
+        margin-right: 10px;
+      }
       .default-msg {
         margin-top: 10px;
         color: #BDBDBD;
@@ -39,12 +45,20 @@
         font-size: 18pt;
         letter-spacing: 1px;    
       }
+      .itemRow {
+        display: flex;
+        align-content: center;
+      }
     </style>
     <p class="default-msg" hidden="[[!hideCartItems]]">No items in your cart</p>
     <div hidden="[[hideCartItems]]">
       <template id="cartItems" is="dom-repeat" items="[[items]]" restamp>
         <div class="flex-row">
-          <div>
+          <div class="itemRow" data-code$="[[item.code]]">
+            <svg class="grey-fill trash" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" on-click="removeItem">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
             <span><b>Barcode: </b>[[item.code]] <br/>([[item.format]])</span>
           </div>
           <span>2.14</span>
@@ -137,9 +151,11 @@
             var taxCost = this.subTotal * ((tax / 100));
             var taxCostTotal = this.subTotal * ((tax / 100) + 1);
             if (index === 0) {
+              console.log('idx is 0, taxCostTotal', taxCostTotal);
               this.total = taxCostTotal;
             } else {
-              this.total += taxCostTotal;
+              console.log('else, taxCost', taxCost);
+              this.total += taxCost;
             }
             _taxBreakdown.push({
               tax: tax.toFixed(2),
@@ -148,6 +164,19 @@
           }.bind(this));
           this.taxBreakdown = _taxBreakdown;
           this.total = this.total.toFixed(2);
+        }
+      }
+      removeItem(e) {
+        var targetEl = Polymer.dom(e).rootTarget;
+        console.log('wanting to remove item code', targetEl.closest('div').dataset.code);
+        this.items = this.items.filter(item => item.code !== targetEl.closest('div').dataset.code);
+        
+        if (this.items.length) {
+          this.subTotal -= 2.14;
+          this.subTotal = this.subTotal.toFixed(2);
+          this.updateTotals();
+        } else if (!this.items.length) {
+          this.hideCartItems = true;
         }
       }
     }
