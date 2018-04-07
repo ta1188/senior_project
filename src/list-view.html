@@ -93,9 +93,6 @@
       }
 
     </style>
-    <firebase-query id="listItems" 
-                    path="{{listItemsPath}}" 
-                    data="{{listItemsData}}"></firebase-query>
     <firebase-document id="list" path="{{listPath}}" data="{{listData}}"></firebase-document>
     <div id="inputContainer" class="flex-row input-container">
       <svg class="plusImg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
@@ -105,8 +102,8 @@
       <input id="itemInput" type="text" placeholder="Add an item..." on-focus="focused" on-blur="blurred" on-input="inputChange">
       <span class="blue addBtn" hidden="[[hideInputAdd]]" on-click="addItem">ADD</span>
     </div>
-    <template is="dom-repeat" id="ironList" items="[[listItemsData]]">
-      <div class="spacing" id="[[item.$key]]">
+    <template is="dom-repeat" id="ironList" items="[[items]]">
+      <div class="spacing" id="[[item.itemKey]]">
         <paper-checkbox noink on-change="removeItem">[[item.itemLabel]]</paper-checkbox>
       </div>
     </template>
@@ -117,17 +114,10 @@
       static get is() { return 'list-view'; }
       static get properties() {
         return {
-          listItemsData: {
-            type: Array,
-            observer: "checkListItems"
-          },
-          listItems: {
-            type: Array,
-            notify: true
-          },
-          listData: {
+          selectedList: {
             type: Object,
-            value: {}
+            notify: true,
+            observer: "confirmSelectedList"
           },
           hideInputAdd: {
             type: Boolean,
@@ -137,10 +127,9 @@
             type: Boolean,
             value: false
           },
-          listKey: {
-            type: String,
-            observer: 'updatePath'
-          }
+          items: Array,
+          listPath: String,
+          listPath: Object
         };
       }
 
@@ -152,13 +141,9 @@
         super.disconnectedCallback();
         window.removeEventListener('undoRemove', this._undoRemove.bind(this));
       }
-      updatePath(_listKey) {
-        this.listItemsPath = '/shopLists/' + _listKey + '/items';
-      }
-      checkListItems(_listItems) {
+      confirmSelectedList(_list) {
         if(window.app.user.uid) {
-          console.log('_listItems: ', _listItems);
-          this.listItems = _listItems;
+          this.items = _list.items;
         }
       }
       inputChange() {
@@ -172,17 +157,25 @@
         this.$.inputContainer.classList.remove('focused');
       }
       addItem() {
-        console.log('adding item, key:', this.listKey);
+        console.log('adding item, key:', this.selectedList.$key);
         this.hideInputAdd = true;
-        var ref = window.firebase.database().ref('shopLists/' + this.listKey + '/items');
-        var newRef = ref.push().key;
-        var updates = {};
-        updates[newRef] = { itemLabel: this.$.itemInput.value };
-        ref.update(updates)
-        .then(function() {
-          this.$.itemInput.value = '';
-          this.emmitLength();
-          return ref.once("value");
+        // var ref = window.firebase.database().ref('shopLists/' + this.listKey + '/items');
+        // var newRef = ref.push().key;
+        // var updates = {};
+        // updates[newRef] = { itemLabel: this.$.itemInput.value };
+        // ref.update(updates)
+        this.listData = { itemLabel: this.$.itemInput.value };
+        this.$.list.saveValue('shopLists/' + this.selectedList.$key + '/items')
+          .then(function() {
+            this.$.list.ref.once("value").then(function(result) {
+              this.push('items', {
+                itemLabel: this.$.itemInput.value,
+                itemKey: result.key
+              });
+              this.items = this.items.slice();
+              this.$.itemInput.value = '';
+              this.emmitLength();
+            }.bind(this));
         }.bind(this));
       }
       removeItem(e) {
@@ -192,6 +185,7 @@
         if (divId) window.setToast('Deleted ' + itemText, 'undoRemove', divId, false);
         _localTarget.classList.add('striked');
         _localTarget.disabled = true;
+        // Delay to allow user to 'UNDO' delete
         setTimeout(function(){
           console.log('Time to kill it');
           this.destroyIt(_localTarget, divId);
@@ -205,12 +199,14 @@
       }
       destroyIt(_localTarget, _itemId) {
         if(!this.saveItem) {
-          this.$.list.path = 'shopLists/' + this.listKey + '/items/' + _itemId;
+          this.$.list.path = 'shopLists/' + this.selectedList.$key + '/items/' + _itemId;
           this.$.list.destroy().then(function(){
+            var removalIndex = this.items.findIndex(item => item.itemKey === _itemId);
+            this.splice('items', removalIndex, 1);
+            this.selectedList = Object.assign(this.selectedList);
             var box;
-            /* Having to add this code to do something that
-            *  Polymer should have been able to do already...
-            */
+            // Having to add this code to do something that
+            // Polymer should have been able to do already...
             if (Polymer.Settings.useShadow) {
               box = this.root.querySelector('paper-checkbox.striked');
             } else {
@@ -231,9 +227,7 @@
         }
       }
       emmitLength() {
-        this.listItems = this.listItemsData;
-
-        console.log('this.listItemsData.length', this.listItemsData.length);
+        // console.log('this.listItemsData.length', this.listItemsData.length);
         // window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length, itemsArr: this.listItemsData}}));
       }
     }

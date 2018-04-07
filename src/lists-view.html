@@ -98,7 +98,7 @@
                     equal-to="{{uid}}" 
                     data="{{listData}}"></firebase-query>
     <firebase-document id="newList" path="/shopLists/" data="{{newListData}}"></firebase-document>
-    <template id="repeater" is="dom-repeat" items="[[items]]">
+    <template id="repeater" is="dom-repeat" items="[[items]]" restamp>
       <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
         <div class="flex-row">
           <svg class="lists-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
@@ -107,7 +107,7 @@
           </svg>
           <span class="list-label">[[item.listName]]</span>
         </div>
-        <span class="grey">[[item.itemsLength]]</span>
+        <span class="grey">[[item.items.length]]</span>
       </div>
     </template>
     <button hidden="[[addingList]]" class="flex-row blue add-btn" on-click="showListInput">
@@ -128,24 +128,17 @@
       static get is() { return 'lists-view'; }
       static get properties() {
         return {
-          items: {
-            type: Array,
-            value: []
-          },
           listData: {
             type: Object,
             observer: "checkList"
           },
-          listItems: {
-            type: Array
+          selectedList: {
+            type: Object,
+            notify: true
           },
           user: {
             type: Object,
             observer: "checkUser"
-          },
-          listKey: {
-            type: String,
-            notify: true
           },
           addingList: {
             type: Boolean,
@@ -153,16 +146,16 @@
           },
           uid: String,
           listName: String,
+          items: Array          
         };
       }
-      connectedCallback() {
-        super.connectedCallback();
-        window.addEventListener('listLength', this._updateLength.bind(this));
+
+      static get observers() {
+        return [
+          'checkItems(listData.*)'
+        ]
       }
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        window.removeEventListener('listLength', this._updateLength.bind(this));
-      }
+
       checkUser(_user) {
         if (_user) {
           console.log('uid: ', window.app.user.uid);
@@ -171,23 +164,15 @@
       }
       checkList(_lists) {
         if (window.app.user.uid && _lists && _lists.length) {
-          // NOTE: length of object is:
-                //  `Object.keys(myObj).length`
-          // this should be unnecessary... -----------------------------
-          _lists.forEach(function(list) { 
-            var itemsList = list.items;
-            var tempArr = [];
-            for (var key in itemsList) {
-              if (itemsList.hasOwnProperty(key)) {
-                tempArr.push(itemsList[key]);
-              }
-            }
-            list.items = tempArr;
-            list.itemsLength = tempArr.length;
-          }); // -------------------------------------------------------
-          console.log('list: ', _lists);
-          this.items = _lists.slice();
-          this.$.repeater.render();
+          console.log('updating your list: ', _lists);
+          
+          this.items = _lists.map(function(list){
+            list.items = Object.keys(list.items).map(function(key) {
+              list.items[key].itemKey = key;
+                return list.items[key];
+              });
+            return list;
+          }.bind(this));
         }
       }
       _viewList(e) {
@@ -195,38 +180,17 @@
         var localTarget = Polymer.dom(e).localTarget;
         if (localTarget) {
           var listId = localTarget.closest('.item-container').id;
-          var selectedList = this.items.filter(list => list.$key === listId);
-          if (this.listName === selectedList[0].listName) {
-            this.transitionPage();
-          } else {
-            this.listName = selectedList[0].listName;
-            this.listKey = listId;
-            this.transitionPage();
+          this.selectedList = this.items.filter(list => list.$key === listId)[0];
+          if (this.listName !== this.selectedList.listName) {
+            this.listName = this.selectedList.listName;
           }
+          this.transitionPage();
         } 
       }
       transitionPage() {
         window.setBannerLabel(this.listName, true, '/lists');
         window.history.pushState({}, null, 'list');
         window.dispatchEvent(new CustomEvent ('location-changed'));
-      }
-      _updateLength(event) {
-        console.log('I hear you');
-        if (event) {
-          var _index;
-          var list = this.items.filter(function(item, index) {
-          if (item.$key === this.listKey) {
-              _index = index;
-              return item;
-            }
-          }.bind(this));
-          var temp = this.items;
-          temp[_index] = list[0];
-          temp[_index].itemsLength = event.detail.length;
-          this.items = temp.slice();
-          // this.$.repeater.render();
-          // this._updateLists();
-        }
       }
       showListInput() {
         this.addingList = true;
@@ -263,6 +227,30 @@
           // console.log('updating', event.detail.itemsArr);
           // this.notifyPath('listData');
           // this.$.repeater.render();
+        }
+      }
+      checkItems(updatedList) {
+        if (updatedList.base && updatedList.base.length
+            && updatedList.value && this.selectedList) {
+          console.log('LIST INSIDE: ', updatedList);
+          var test = updatedList.base.map(function(list, index){
+            if (!Array.isArray(list.items)) {
+              list.items = Object.keys(list.items).map(function(key) {
+              list.items[key].itemKey = key;
+                return list.items[key];
+              });
+            }
+            // debugger;
+            // this.splice('items', index, 1, list);  
+            this.items = this.items.slice();    
+            Polymer.dom.flush();    
+            return list;
+          }.bind(this));
+          // this.items = test;
+          console.log('test: ', test);
+          
+            this.items = test;
+          // debugger;
         }
       }
     }

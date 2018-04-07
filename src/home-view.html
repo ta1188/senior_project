@@ -187,8 +187,8 @@
           <checkout-view name="checkout"></checkout-view>
           <scanner-view name="scanner" active="{{scannerActive}}" scanned-items="{{scannedItems}}"></scanner-view>
           <store-view name="store"></store-view>
-          <lists-view name="lists" user="{{user}}" list-key="{{listKey}}" list-items="{{listItems}}"></lists-view>
-          <list-view name="list" user="{{user}}" list-key="[[listKey]]" list-items="{{listItems}}"></list-view>
+          <lists-view name="lists" user="{{user}}" selected-list="{{selectedList}}"></lists-view>
+          <list-view name="list" user="{{user}}" selected-list="{{selectedList}}"></list-view>
           <receipts-view name="receipts" user="{{user}}" selected-receipt="{{selectedReceipt}}"></receipts-view>
           <receipt-view name="receipt" selected-receipt="{{selectedReceipt}}"></receipt-view>
     
@@ -254,12 +254,8 @@
             },
             observer: '_routeChanged'
           },
-          listKey: {
-            type: String,
-            notify: true
-          },
-          listItems: {
-            type: Array,
+          selectedList: {
+            type: Object,
             notify: true
           },
           withinRange: {
