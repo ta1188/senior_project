@@ -35,19 +35,29 @@
       .checkout-btn {
         font-family: Verdana, Geneva, sans-serif;
         margin-top: 10px;
-        width: 100%;
+        width: 80%;
         padding: 10px;
-        background: #FBB782;
+        background: #ffa967;
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
         border-radius: 5px;
         color: #FFFFFF;
         border: 3px solid white;    
         font-size: 18pt;
+        outline: none;
         letter-spacing: 1px;    
+      }
+      .checkout-btn:active {
+        background-color: #FBB782;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
       }
       .itemRow {
         display: flex;
         align-content: center;
+      }
+      .center {
+        width: 100%;
+        justify-content: center;
       }
     </style>
     <p class="default-msg" hidden="[[!hideCartItems]]">No items in your cart</p>
@@ -71,8 +81,8 @@
         </div>
         <template is="dom-repeat" items="[[taxBreakdown]]">
           <div class="flex-row">
-            <span><b>Tax </b>[[item.tax]] %</span>
-            <span>[[item.cost]]</span>
+            <span><b>Tax </b>[[item.taxPercent]] %</span>
+            <span>[[item.taxCost]]</span>
           </div>
         </template>
         <div class="flex-row">
@@ -80,7 +90,9 @@
           <h4>[[total]]</h4>
         </div>
       </div>
-      <button class="checkout-btn" on-click="logout">Checkout</button>
+      <div class="flex-row center">
+        <button class="checkout-btn" on-click="checkout">Checkout</button>
+      </div>
     </div>
     <p class="default-msg"><i><b>Note:</b> Once connected to a store's database the barcode would be sent to their API which would return the basic product info associated with the item. For demo purpose a fixed price per item has been given.</i></p>
   </template>
@@ -158,8 +170,8 @@
               this.total += taxCost;
             }
             _taxBreakdown.push({
-              tax: tax.toFixed(2),
-              cost: taxCost.toFixed(2)
+              taxPercent: tax.toFixed(2),
+              taxCost: taxCost.toFixed(2)
             });
           }.bind(this));
           this.taxBreakdown = _taxBreakdown;
@@ -178,6 +190,12 @@
         } else if (!this.items.length) {
           this.hideCartItems = true;
         }
+      }
+      checkout() {
+        window.dispatchEvent(new CustomEvent('checkingOut', {bubbles: true, composed: true, detail: {cartItems: this.items, subTotal: this.subTotal, taxBreakdown: this.taxBreakdown, total: this.total}}));
+
+        window.history.pushState({}, null, 'checkout');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
       }
     }
 

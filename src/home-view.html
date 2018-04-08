@@ -16,6 +16,8 @@
 <link rel="import" href="./receipt-view.html">
 <link rel="import" href="./lists-view.html">
 <link rel="import" href="./list-view.html">
+<link rel="import" href="./billing-view.html">
+<link rel="import" href="./confirmation-view.html">
 <link rel="import" href="./four-oh-four-view.html">
 
 <dom-module id="home-view">
@@ -54,7 +56,7 @@
         padding: 10px;
         position: absolute;
         bottom: 35px;
-        width: 45px;
+        width: 75px;
         left: 0;
         right: 0;
         margin: auto;
@@ -63,6 +65,12 @@
         background: linear-gradient(180deg, rgba(58, 131, 124, 0.8) 0%, rgba(255, 255, 255, 0) 100%), #3A837C;
         box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
         z-index: 100;
+        outline: none;
+      }
+      .scanCircle:active {
+        background-color: #469e95;
+        box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
       }
       .scanCircle img {
         width: 45px;
@@ -70,14 +78,20 @@
       }
       .cart-icon-container {
         padding: 5px;
-        background-color: #FBB782;
+        background-color: #ffa967;
         position: absolute; 
         border-radius: 50%;
+        outline: none;
         border: 3px solid white;
         box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
         right: 20px;
         top: 48px;
         z-index: 100;
+      }
+      .cart-icon-container:active {
+        background-color: #fbb782;
+        box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
       }
       .cart-icon-container img {
         width: 30px;
@@ -161,6 +175,8 @@
     <app-route route="{{route}}" pattern="/list"></app-route>
     <app-route route="{{route}}" pattern="/receipts"></app-route>
     <app-route route="{{route}}" pattern="/receipt"></app-route>
+    <app-route route="{{route}}" pattern="/billing"></app-route>
+    <app-route route="{{route}}" pattern="/confirmation"></app-route>
     <!-- <app-route route="{{route}}" pattern="/four-oh-four"></app-route> -->
 
       <div id="bannerLabel" class$="nav-bar header-nav [[_hideOnLogin(page)]]">
@@ -174,9 +190,9 @@
           </div>
         </a>
         <h2 hidden="[[!hideListsReturn]]">[[bannerLabel]]</h2>
-        <div class="cart-icon-container" on-click="moveToCart">
+        <button class="cart-icon-container" on-click="moveToCart">
           <img src="../assets/shopping_cart_24px.svg" alt="Account" />
-        </div>
+        </button>
       </div> 
       <div id="mainContent" class$="main-content [[_isLogin(page)]]">
         <!-- iron-pages selects the view based on the active route -->
@@ -191,6 +207,8 @@
           <list-view name="list" user="{{user}}" selected-list="{{selectedList}}"></list-view>
           <receipts-view name="receipts" user="{{user}}" selected-receipt="{{selectedReceipt}}"></receipts-view>
           <receipt-view name="receipt" selected-receipt="{{selectedReceipt}}"></receipt-view>
+          <billing-view name="billing"></billing-view>
+          <confirmation-view name="confirmation"></confirmation-view>
     
           <four-oh-four-view name="four-oh-four"></four-oh-four-view>
         </iron-pages>
@@ -204,9 +222,9 @@
         <img src="../assets/store_24px.svg" alt="Stores" />
       </a>
       <a name="scanner" href="scanner" hidden="[[!withinRange]]">
-        <div class="scanCircle">
+        <button class="scanCircle">
           <img src="../assets/barcode.svg" alt="Scanner" />
-        </div>
+        </button>
       </a>
       <a name="receipts" href="receipts">
         <img src="../assets/receipt_24px.svg" alt="Receipts Lists" />
@@ -388,6 +406,10 @@
         }
         if (page === 'account') window.setBannerLabel('Account');
         if (page === 'scanner') window.setBannerLabel('');
+        if (page === 'cart') window.setBannerLabel('Cart');
+        if (page === 'checkout') window.setBannerLabel('Payment Method');
+        if (page === 'billing') window.setBannerLabel('Add Billing Info');
+        if (page === 'confirmation') window.setBannerLabel('');
       }
 
       _showPage404() {

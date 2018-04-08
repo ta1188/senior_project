@@ -1,0 +1,83 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="confirmation-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+        margin-top: 25px;
+      }
+      .center-text {
+        text-align: center;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+      }
+      .center {
+        justify-content: center;
+        align-content: center;
+      }
+      .receipt-btn {
+        margin-top: 10px;
+        width: 100%;
+        padding: 15px;
+        background: #1C7067;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        color: #FFFFFF;
+        font-family: Verdana, Geneva, sans-serif;
+        border: none;
+        outline: none;   
+      }
+      .receipt-btn:active {
+        background-color: #228b81;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
+      }
+    </style>
+    <h2 class="center-text">Purchase Complete</h2>
+    <div class="flex-row center">
+      <button class="receipt-btn" on-click="viewReceipt">View Receipt</button>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class ConfirmationView extends Polymer.Element {
+      static get is() { return 'confirmation-view'; }
+      static get properties() {
+        return {
+          cardInfoData: {
+            type: Object,
+            observer: "checkCardInfo"
+          },
+          uid: String
+        };
+      }
+      connectedCallback () {
+        super.connectedCallback();
+        window.addEventListener('checkingOut', this.renderCheckout.bind(this));
+      }
+      disconnectedCallback () {
+        window.removeEventListener('checkingOut', this.renderCheckout.bind(this));
+      }
+      renderCheckout(e) {
+        if (!e && !e.detail) return;
+        console.log('checkout Detail', e.detail);
+        this.total = parseFloat(e.detail.total);
+      }
+      viewReceipt() {
+        window.history.pushState({}, null, 'receipts');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
+      }
+    }
+
+    window.customElements.define(ConfirmationView.is, ConfirmationView);
+  </script>
+</dom-module>

@@ -1,0 +1,174 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+
+
+<dom-module id="billing-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+        color: #828282;
+        margin-top: 25px;
+      }
+      .flex-start {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .space-between {
+        justify-content: space-between;
+      }
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+      }
+      .add-card {
+        margin-top: 20px;
+        width: 100%;
+        padding: 15px;
+        background: #1C7067;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        color: #FFFFFF;
+        font-family: Verdana, Geneva, sans-serif;
+        border: none;
+        outline: none;
+      }
+      .add-card:active {
+        background-color: #228b81;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
+      }
+      input {
+        margin: 10px 0;
+        font-family: Verdana, Geneva, sans-serif;
+        padding: 10px 0;
+        width: 100%;
+        outline: none;
+        border: none;
+        border-bottom: 1px solid #E0E0E0;
+        background-color: transparent;
+        color: #4F4F4F;
+        font-size: 1rem;
+      }
+      input:focus {
+        border-bottom: 2px solid #E0E0E0;
+      }
+      .exp-fields, .half-size input {
+        width: 45%;
+      }
+      .grey-fill {
+        fill: #BDBDBD;
+        margin-right: 15px;
+      }
+      .exp-fields, .exp-fields input {
+        width: 30%;
+      }
+      .expLabel {
+        position: relative;
+        top: 12px;
+        font-size: 10pt;
+      }
+      .errBorder {
+        border-bottom: 2px solid #ff4646;
+      }
+    </style>
+    <firebase-document id="card" path="{{cardPath}}" data="{{cardData}}"></firebase-document>
+    <div class="flex-row">
+      <svg class="grey-fill" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+      </svg>
+      <paper-dropdown-menu id="cardType" label="Card Type">
+        <paper-listbox slot="dropdown-content" selected="0">
+          <paper-item>VISA</paper-item>
+          <paper-item>MasterCard</paper-item>
+          <paper-item>American Express</paper-item>
+          <paper-item>Discover</paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu>
+    </div>
+    <input type="text" placeholder="Name on card" id="cardHolder">
+    <input type="number" min="1" max="9999999999999999" placeholder="Card number" id="cardNum">
+    <label class="expLabel" for="expField">Exp. Date</label>
+    <div class="half-size flex-row space-between">
+      <div class="exp-fields flex-row space-between">
+        <input name="expField" type="number" min="1" max="99" placeholder="MM" id="expMo">
+        <h4> / </h4>
+        <input type="number" min="1" max="99" placeholder="YY" id="expYr">
+      </div>
+      <input type="number" min="1" max="9999" placeholder="Security Code" id="secNum">
+    </div>
+    <input type="number" min="1" max="99999" placeholder="Zip code" id="zipCode">
+    <button class="add-card" on-click="addCard">Add Card</button>
+  </template>
+
+  <script>
+    class BillingView extends Polymer.Element {
+      static get is() { return 'billing-view'; }
+      static get properties() {
+        return {
+          cardData: Object,
+          cardHolder: String,
+          cardNum: Number,
+          expDate: Number,
+          secNum: Number,
+          zipCode: Number
+        };
+      }
+      hasValidInputs() {
+        var cardHolder = this.$.cardHolder;
+        var chClass = this.$.cardHolder.classList;
+        var cardNum = this.$.cardNum;
+        var cnClass = this.$.cardNum.classList;
+        var expMo = this.$.expMo;
+        var emClass = this.$.expMo.classList;
+        var expYr = this.$.expYr;
+        var eyClass = this.$.expYr.classList;
+        var secNum = this.$.secNum;
+        var snClass = this.$.secNum.classList;
+        var zipCode = this.$.zipCode;
+        var zcClass = this.$.zipCode.classList;
+
+        cardHolder.value ? chClass.remove('errBorder') : chClass.add('errBorder');
+        cardNum.value ? cnClass.remove('errBorder') : cnClass.add('errBorder');
+        expMo.value ? emClass.remove('errBorder') : emClass.add('errBorder');
+        expYr.value ? eyClass.remove('errBorder') : eyClass.add('errBorder');
+        secNum.value ? snClass.remove('errBorder') : snClass.add('errBorder');
+        zipCode.value ? zcClass.remove('errBorder') : zcClass.add('errBorder');
+
+        if (!cardHolder.value || !cardNum.value || !expMo.value 
+            || !expYr.value  || !secNum.value || !zipCode.value) return false;
+        else return true;
+      }
+      addCard(){
+        if(this.hasValidInputs()) {
+          this.cardData = {
+            cardType: this.$.cardType.selectedItemLabel,
+            cardHolder: this.$.cardHolder.value,
+            cardNum: this.$.cardNum.value,
+            expDate: this.$.expMo.value + '/' + this.$.expYr.value,
+            secNum: this.$.secNum.value,
+            zipCode: this.$.zipCode.value,
+            userId: app.user.uid
+          }
+          console.log('cardData: ', this.cardData);
+          this.$.card.saveValue('tempCardInfo').then(function(resp){
+            console.log('saved it');
+          }).catch(function(err) {
+            console.log('error saving', err);
+          });
+        }
+      }
+    }
+
+    window.customElements.define(BillingView.is, BillingView);
+  </script>
+</dom-module>

@@ -1,13 +1,185 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 
 <dom-module id="checkout-view">
   <template>
     <style>
       :host {
         display: block;
+        margin-top: 25px;
       }
+      .center-text {
+        text-align: center;
+      }
+      .checkout-btn {
+        font-family: Verdana, Geneva, sans-serif;
+        margin-top: 10px;
+        width: 80%;
+        padding: 10px;
+        background: #ffa967;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        color: #FFFFFF;
+        border: 3px solid white;    
+        font-size: 18pt;
+        outline: none;
+        letter-spacing: 1px;    
+      }
+      .checkout-btn:active {
+        background-color: #FBB782;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
+      }
+      .flex-column {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+      }
+      .flex-column div {
+        color: #828282;
+        margin: 10px 0;
+      }
+
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+      }
+      .center {
+        justify-content: center;
+        align-content: center;
+      }
+      .flex-row h3, h4 {
+        margin: 0;
+        align-self: center;
+      }
+      .flex-row h3 {
+        margin-right: 15px;
+      }
+      .blue {
+        color: #2F80ED;
+      }
+      .plus-svg {
+        fill: #2F80ED;
+      }
+      .add-btn {
+        font-family: Verdana, Geneva, sans-serif;
+        font-size: 14px;
+        outline: none;
+        border: none;
+        padding: 10px 10px 10px 0;
+        margin: 15px 0 0 0;
+        background-color: transparent;
+      }
+      .add-btn:hover {
+        cursor: pointer;
+      }
+      .add-btn span {
+        align-self: center;
+      }
+      .bottom-totals {
+        position: absolute;
+        bottom: 65px;
+        width: 85vw;
+      }
+      .grey-fill {
+        fill: #BDBDBD;
+        margin-right: 5px;
+        align-self: center;
+        position: relative;
+        top: 5px;
+      }
+      /* HTML5 Boilerplate accessible hidden styles */
+      [type="radio"] {
+        border: 0; 
+        clip: rect(0 0 0 0); 
+        height: 1px; margin: -1px; 
+        overflow: hidden; 
+        padding: 0; 
+        position: absolute; 
+        width: 1px;
+      }
+
+      /* One radio button per line */
+      label {
+        display: block;
+        cursor: pointer;
+        
+      }
+
+      [type="radio"] + span {
+        display: block;
+      }
+
+      /* the basic, unchecked style */
+      [type="radio"] + span:before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        vertical-align: -0.25em;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 3px #BDBDBD;
+        margin-right: 0.75em;
+        transition: 0.5s ease all;
+      }
+
+      /* the checked style using the :checked pseudo class */
+      [type="radio"]:checked + span:before {
+        background: #1C7067;
+        box-shadow: 0 0 0 3px #979797;
+      }
+
+      /* never forget focus styling */
+      [type="radio"]:focus + span {
+        background-color: transparent;
+      }
+
     </style>
-    <p>Hello [[prop1]]!</p>
+    <firebase-query id="cardInfo" 
+                    path="/tempCardInfo" 
+                    order-by-child="userId" 
+                    equal-to="{{uid}}" 
+                    data="{{cardInfoData}}"></firebase-query>
+    <firebase-document id="receipt" path="{{receiptPath}}" data="{{receiptData}}"></firebase-document>
+
+    <h2 class="center-text">Select Payment Method</h2>
+    <div class="flex-column">
+      <template id="repeater" is="dom-repeat" items="[[items]]" restamp>
+        <div>
+          <label for="card[[item.cardlastFour]]">
+            <input id="card[[item.cardlastFour]]" type="radio" name="billing"> 
+            <span>
+              <svg class="grey-fill" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+              </svg> 
+              [[item.cardType]] [[item.lastFour]]</span>
+          </label>
+        </div>
+      </template>
+      <div>
+        <label for="cardPayPal">
+          <input id="cardPayPal" type="radio" name="billing"> 
+          <span>PayPal</span>
+        </label>
+      </div>
+    </div>
+    <button hidden="[[addingList]]" class="flex-row blue add-btn" on-click="addBillingInfo">
+      <svg class="plus-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        <path d="M0 0h24v24H0z" fill="none"/>
+      </svg>
+      <span>Payment Method</span>
+    </button>
+    <div class="flex-column bottom-totals">
+      <div class="flex-row center">
+        <h3>TOTAL: </h3>
+        <h4>[[total]]</h4>
+      </div>
+      <div class="flex-row center">
+        <button class="checkout-btn" on-click="checkout">Checkout</button>
+      </div>
+    </div>
   </template>
 
   <script>
@@ -19,11 +191,81 @@
       static get is() { return 'checkout-view'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'checkout-view'
-          }
+          cardInfoData: {
+            type: Object,
+            observer: "checkCardInfo"
+          },
+          cartInfo: Object,
+          receiptData: Object,
+          total: Array,
+          total: Number,
+          uid: String
         };
+      }
+      connectedCallback () {
+        super.connectedCallback();
+        window.addEventListener('checkingOut', this.renderCheckout.bind(this));
+        if (window.app.user.uid) {
+          console.log('uid: ', window.app.user.uid);
+          this.uid = window.app.user.uid;
+        }
+      }
+      disconnectedCallback () {
+        window.removeEventListener('checkingOut', this.renderCheckout.bind(this));
+      }
+      renderCheckout(e) {
+        if (!e && !e.detail) return;
+        this.cartInfo = e.detail;
+        console.log('checkout Detail', e.detail);
+        this.total = parseFloat(e.detail.total);
+      }
+      checkCardInfo(e) {
+        console.log('billing info: ', e);
+        if (e.length) {
+          var tempArr = [];
+          e.forEach(function(card){
+            tempArr.push({
+              cardType: card.cardType,
+              lastFour: card.cardNum.toString().substr(-4)
+            })
+          });
+          this.items = tempArr;
+        }
+      }
+      addBillingInfo() {
+        // TODO: Have redirect back to checkout screen...
+
+        window.history.pushState({}, null, 'billing');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
+      }
+      checkout() {
+        var cartItemsArr = [];
+        this.cartInfo.cartItems.forEach(function(item){
+          cartItemsArr.push({
+            discountAmount: 0,
+            itemLabel: "[" + item.code + "]",
+            unitPrice: 2.14, 
+            upc: item.code
+          })
+        }.bind(this));
+
+        // receiptData
+        this.receiptData = {
+          confirmationNum: 123,
+          date: new Date().toLocaleString('en-US', {month: '2-digit', day: '2-digit', year: '2-digit'}),
+          items: cartItemsArr,
+          storeId: 354432,
+          storeLocation: 'Springvill, UT', 
+          storeName: 'WalMart',
+          subTotal: this.cartInfo.subTotal,
+          tax: this.cartInfo.taxBreakdown,
+          total: this.cartInfo.total,
+          userId: window.app.user.uid
+        }
+
+        this.$.receipt.saveValue('receipts');
+        window.history.pushState({}, null, 'confirmation');
+        window.dispatchEvent(new CustomEvent ('location-changed'));
       }
     }
 

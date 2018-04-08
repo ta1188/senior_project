@@ -112,12 +112,12 @@
       tester(receipt) {
         console.log('your receipt', this.selectedReceipt);
         this.itemsArr = Object.keys(receipt.items).map(function(key) {
-          receipt.items[key].unitPrice = parseInt(receipt.items[key].unitPrice).toFixed(2);
+          receipt.items[key].unitPrice = parseFloat(receipt.items[key].unitPrice).toFixed(2);
           return receipt.items[key];
         });
         this.taxArr = Object.keys(receipt.tax).map(function(key) {
-          receipt.tax[key].taxPercent = parseInt(receipt.tax[key].taxPercent).toFixed(2);
-          receipt.tax[key].taxCost = parseInt(receipt.tax[key].taxCost).toFixed(2);
+          receipt.tax[key].taxPercent = parseFloat(receipt.tax[key].taxPercent).toFixed(2);
+          receipt.tax[key].taxCost = parseFloat(receipt.tax[key].taxCost).toFixed(2);
           return receipt.tax[key];
         });
       }

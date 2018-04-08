@@ -9,7 +9,11 @@
     "polymerfire": "firebase/polymerfire#^2.x",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.2",
     "paper-toast": "PolymerElements/paper-toast#^2.1.0",
-    "quagga": "^0.12.1"
+    "quagga": "^0.12.1",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.1.0",
+    "paper-item": "PolymerElements/paper-item#^2.1.0",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.1.0",
+    "web-animations-js": "^2.3.1"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.x",
