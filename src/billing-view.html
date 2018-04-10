@@ -162,7 +162,19 @@
           console.log('cardData: ', this.cardData);
           this.$.card.saveValue('tempCardInfo').then(function(resp){
             console.log('saved it');
-          }).catch(function(err) {
+            window.setToast('Successfully added card');
+            this.$.cardType.selectedItemLabel = '';
+            this.$.cardHolder.value = '';
+            this.$.cardNum.value = '';
+            this.$.expMo.value = '';
+            this.$.expYr.value = '';
+            this.$.secNum.value = '';
+            this.$.zipCode.value = '';
+
+            window.history.pushState({}, null, 'store');
+            window.dispatchEvent(new CustomEvent ('location-changed'));
+          }.bind(this)).catch(function(err) {
+            window.setToast('Problem adding card');
             console.log('error saving', err);
           });
         }

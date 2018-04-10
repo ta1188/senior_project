@@ -306,8 +306,6 @@
       }
       connectedCallback() {
         super.connectedCallback();
-        console.log('callback, ....about to attempt SW register');
-        
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('../service-worker.js').then(function(){
             console.log('SW Registered');
@@ -346,13 +344,13 @@
         }
       }
       _locationError(err) {
-        console.log("Error:", err);
+        console.error("Error:", err);
         window.setToast('Error:' + err);
         if(err.code == 1) {
-          console.log("Error: Access is denied!", err);
+          console.error("Error: Access is denied!", err);
         }
         else if( err.code == 2) {
-          console.log("Error: Position is unavailable!", err);
+          console.error("Error: Position is unavailable!", err);
         }
         else if( err.code == 3) {
           window.setToast('We\'re having trouble finding your location');
@@ -427,7 +425,7 @@
         if (this.user){
           if (navigator.geolocation) {
             console.log('Geolocation available');
-            
+            window.setToast('Store within range');
             // this.watchID = navigator.geolocation.getCurrentPosition(function(position) {
               navigator.geolocation.watchPosition(this._locationSuccess.bind(this), this._locationError, { enableHighAccuracy: true, maximumAge: 50000, timeout: 50000});
           } else {

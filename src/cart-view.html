@@ -143,14 +143,19 @@
       }
 
       checkItems(_items) {
-        console.log('change to scannedItems', _items);
+        // console.log('change to scannedItems', _items);
         if (_items && _items.indexSplices && _items.indexSplices[0].addedCount) {
-          this.hideCartItems = false;
-          this.push('items', _items.indexSplices[0].object[0]);
-          this.scannedItems = [];
-          // temp default value assignment
-          this.subTotal += 2.14;
-          this.updateTotals();
+          if (_items.indexSplices[0].object[0].code == '0072486002403') {
+            window.setToast('RESTRICTED: Item requires standard checkout');
+            this.scannedItems = [];
+          } else {
+            this.hideCartItems = false;
+            this.push('items', _items.indexSplices[0].object[0]);
+            this.scannedItems = [];
+            // temp default value assignment
+            this.subTotal += 2.14;
+            this.updateTotals();
+          }
         } else if (!this.items.length) {
           this.hideCartItems = true;
         }
@@ -159,14 +164,11 @@
         if (this.items && this.items.length) {
           var _taxBreakdown = [];
           this.taxes.forEach(function(tax, index) {
-            console.log(index)
             var taxCost = this.subTotal * ((tax / 100));
             var taxCostTotal = this.subTotal * ((tax / 100) + 1);
             if (index === 0) {
-              console.log('idx is 0, taxCostTotal', taxCostTotal);
               this.total = taxCostTotal;
             } else {
-              console.log('else, taxCost', taxCost);
               this.total += taxCost;
             }
             _taxBreakdown.push({
@@ -180,7 +182,6 @@
       }
       removeItem(e) {
         var targetEl = Polymer.dom(e).rootTarget;
-        console.log('wanting to remove item code', targetEl.closest('div').dataset.code);
         this.items = this.items.filter(item => item.code !== targetEl.closest('div').dataset.code);
         
         if (this.items.length) {

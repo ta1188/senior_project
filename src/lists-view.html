@@ -247,13 +247,12 @@
       }
       checkUser(_user) {
         if (_user) {
-          console.log('uid: ', window.app.user.uid);
+          // console.log('uid: ', window.app.user.uid);
           this.uid = _user.uid;
         }
       }
       checkList(_lists) {
         if (window.app.user.uid && _lists && _lists.length) {
-          console.log('updating your list: ', _lists);
           var newArrayData = [];
           newArrayData = Array.isArray(_lists) ? _lists.slice() : Object.values(_lists);
           this.items = newArrayData.map(function(list){
@@ -266,7 +265,6 @@
         }
       }
       _viewList(e) {
-        console.log('_viewList');
         var localTarget = Polymer.dom(e).localTarget;
         if (localTarget) {
           var listId = localTarget.closest('.item-container').id;
@@ -304,7 +302,6 @@
             var tempList = this.listData;
             var indx = tempList.map(item => item.items).indexOf(0);
             if (indx >= 0) tempList[indx].items = Array(0);
-            console.log('updating', tempList);
 
             this.items = tempList.slice();
             this.notifyPath('items');
@@ -336,7 +333,6 @@
         }.bind(this));
       }
       deleteList(e) {
-        console.log('entered deleteList');
         var listId = this.editListId;
         var selectedIndx = this.items.map(list => list.$key).indexOf(listId);
         this.splice('items', selectedIndx, 1);
@@ -348,7 +344,6 @@
       checkItems(updatedList) {
         if (updatedList.base && updatedList.base.length
             && updatedList.value && (this.selectedListIndx >= 0)) {
-          console.log('LISTS -> checkItems: ', updatedList);
           this.items = updatedList.base.map(function(list){
             if (!Array.isArray(list.items)) {
               list.items = Object.keys(list.items).map(function(key) {

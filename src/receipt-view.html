@@ -110,7 +110,6 @@
         };
       }
       tester(receipt) {
-        console.log('your receipt', this.selectedReceipt);
         this.itemsArr = Object.keys(receipt.items).map(function(key) {
           receipt.items[key].unitPrice = parseFloat(receipt.items[key].unitPrice).toFixed(2);
           return receipt.items[key];

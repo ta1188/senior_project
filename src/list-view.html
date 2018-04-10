@@ -159,11 +159,7 @@
       addItem() {
         console.log('adding item, key:', this.selectedList.$key);
         this.hideInputAdd = true;
-        // var ref = window.firebase.database().ref('shopLists/' + this.listKey + '/items');
-        // var newRef = ref.push().key;
-        // var updates = {};
-        // updates[newRef] = { itemLabel: this.$.itemInput.value };
-        // ref.update(updates)
+
         this.listData = { itemLabel: this.$.itemInput.value };
         this.$.list.saveValue('shopLists/' + this.selectedList.$key + '/items')
           .then(function() {
@@ -185,12 +181,11 @@
         var _localTarget = Polymer.dom(e).localTarget;
         var divId = _localTarget.parentElement.id;
         var itemText = _localTarget.innerText; // Checkbox text
-        if (divId) window.setToast('Deleted ' + itemText, 'undoRemove', divId, false);
+        if (divId) window.setToast('Deleting ' + itemText, 'undoRemove', divId, false);
         _localTarget.classList.add('striked');
         _localTarget.disabled = true;
         // Delay to allow user to 'UNDO' delete
         setTimeout(function(){
-          console.log('Time to kill it');
           this.destroyIt(_localTarget, divId);
         }.bind(this), 2800);
       }

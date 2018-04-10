@@ -69,7 +69,6 @@
       }
       renderCheckout(e) {
         if (!e && !e.detail) return;
-        console.log('checkout Detail', e.detail);
         this.total = parseFloat(e.detail.total);
       }
       viewReceipt() {

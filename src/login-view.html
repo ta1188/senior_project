@@ -302,7 +302,6 @@
           this.errMsg = "Invalid Email";
           this.showErr();
           this.$.auth.sendPasswordResetEmail(this.$.email.value).then(function(resp){
-            console.log(resp);
             window.setToast('Password reset email sent', null, null, true);
             this.clearForm();
           }).catch(function(err){
@@ -311,7 +310,6 @@
           }.bind(this));
         } else if (userEmail) {
           this.$.auth.sendPasswordResetEmail(userEmail).then(function(resp){
-            console.log(resp);
             window.setToast('Password reset email sent', null, null, true);
           }).catch(function(err){
             window.setToast(err.message);
@@ -324,7 +322,6 @@
           this.showErr(1500);
         }
         this.$.auth.createUserWithEmailAndPassword(this.$.email.value, this.$.password.value).then(function(resp){
-          console.log(resp);
           this.clearForm();
           this.storeUser(resp);
         }.bind(this)).catch(function(err){
@@ -339,7 +336,7 @@
         }.bind(this),delay);
       }
       checkSigin(test) {
-        console.log('signedIn status:', this.signedIn);
+        // console.log('signedIn status:', this.signedIn);
         if (!window.app) window.app = { user: {} }; 
         if (this.user) window.app.user = this.user;
 

@@ -202,6 +202,11 @@
           uid: String
         };
       }
+      static get observers() {
+        return [
+          'checkCardInfo(cardInfoData.*)'
+        ]
+      }
       connectedCallback () {
         super.connectedCallback();
         window.addEventListener('checkingOut', this.renderCheckout.bind(this));
@@ -221,15 +226,17 @@
       }
       checkCardInfo(e) {
         console.log('billing info: ', e);
-        if (e.length) {
+        if (e.base && e.base.length) {
           var tempArr = [];
-          e.forEach(function(card){
+          e.base.forEach(function(card){
             tempArr.push({
               cardType: card.cardType,
               lastFour: card.cardNum.toString().substr(-4)
             })
           });
           this.items = tempArr;
+          this.notifyPath('items');
+          this.notifyPath('items.*');
         }
       }
       addBillingInfo() {
