@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
 
 <dom-module id="lists-view">
@@ -14,6 +15,7 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        align-content: center;
       }
       .flex-row * {
         align-self: center;
@@ -33,6 +35,8 @@
       .lists-svg {
         height: 30px;
         width: 30px;
+      }
+      .grey-fill {
         fill: #BDBDBD;
       }
       .add-btn {
@@ -50,7 +54,7 @@
       .item-container {
         margin-bottom: 20px;
       }
-      #addListInput {
+      input, #addListInput {
         font-family: Verdana, Geneva, sans-serif;
         padding: 10px 0;
         width: 78%;
@@ -61,7 +65,7 @@
         font-size: 1rem;
         border-bottom: 1px solid #BDBDBD;
       }
-      #addListInput:focus {
+      input:focus, #addListInput:focus {
         border-bottom: 2px solid #BDBDBD;
       }
       [hidden] {
@@ -91,6 +95,68 @@
           transform: translate3d(4px, 0, 0);
         }
       }
+      .wide {
+        width: 100%;
+      }
+      .left-margin {
+        margin-left: 30px;
+      }
+      .text-left {
+        text-align: left;
+      }
+      .delete-btn {
+        margin-right: 30px;
+        padding: 10px;
+        font-size: 10pt;
+        background: #d32f2f;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #FFFFFF;
+        font-family: Verdana, Geneva, sans-serif;
+        border: none;
+        outline: none;
+        justify-content: center;
+      }
+      .delete-btn:active {
+        background-color: #e53935;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
+      }
+      .update-btn {
+        margin: 0 5px;
+        padding: 10px;
+        font-size: 10pt;
+        background: #1C7067;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #FFFFFF;
+        font-family: Verdana, Geneva, sans-serif;
+        border: none;
+        outline: none;
+      }
+      .update-btn:active {
+        background-color: #228b81;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        transform: translateY(1px);
+      }
+      paper-dialog {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+      }
+      paper-dialog h2 {
+        margin: 0;
+        margin-top: 10px;
+        margin-bottom: -20px;
+      }
+      .margin-top {
+        margin-top: 35px;
+      }
+      .font-size {
+        font-size: 10pt;
+      }
     </style>
     <firebase-query id="lists" 
                     path="/shopLists" 
@@ -98,16 +164,22 @@
                     equal-to="{{uid}}" 
                     data="{{listData}}"></firebase-query>
     <firebase-document id="newList" path="/shopLists/" data="{{newListData}}"></firebase-document>
+    <firebase-document id="updateList" path="" data="{{updateListData}}"></firebase-document>
     <template id="repeater" is="dom-repeat" items="[[items]]" restamp>
-      <div id="[[item.$key]]" class="flex-row item-container" on-click="_viewList">
-        <div class="flex-row">
-          <svg class="lists-svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
-              <path d="M0 0h24v24H0z" fill="none"/>
-          </svg>
-          <span class="list-label">[[item.listName]]</span>
+      <div class="flex-row">
+        <div id="[[item.$key]]" class="item-container flex-row wide">
+          <div class="flex-row wide" on-click="_viewList">
+            <svg class="lists-svg grey-fill" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+            <span class="list-label wide text-left">[[item.listName]]</span>
+          </div>
+          <div class="flex-row">
+            <span class="grey">[[item.items.length]]</span>
+            <svg class="grey-fill left-margin" fill="#FFF" height="24" width="24" xmlns="http://www.w3.org/2000/svg" on-click="showListMenu"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+          </div>
         </div>
-        <span class="grey">[[item.items.length]]</span>
       </div>
     </template>
     <button hidden="[[addingList]]" class="flex-row blue add-btn" on-click="showListInput">
@@ -121,6 +193,17 @@
       <input id="addListInput" type="text" placeholder="List name...">
       <span id="addBtn" class="blue addBtn" on-click="addList">ADD</span>
     </div>
+    <paper-dialog id="editListModal" modal>
+      <h2>List Options</h2>
+      <div class="flex-row">
+        <paper-input id="listNameVal" type="text" label="List Name" value="[[editListName]]"></paper-input>
+        <button class="update-btn" on-click="updateListName">Update</button>
+      </div>
+      <div class="flex-row margin-top">
+        <button class="delete-btn" on-click="deleteList">Delete List</button>
+        <button class='font-size' dialog-dismiss>Cancel</button>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -145,6 +228,8 @@
             value: false
           },
           uid: String,
+          editListId: String,
+          editListName: String,
           listName: String,
           items: Array          
         };
@@ -155,7 +240,6 @@
           'checkItems(listData.*)'
         ]
       }
-
       checkUser(_user) {
         if (_user) {
           console.log('uid: ', window.app.user.uid);
@@ -165,8 +249,9 @@
       checkList(_lists) {
         if (window.app.user.uid && _lists && _lists.length) {
           console.log('updating your list: ', _lists);
-          
-          this.items = _lists.map(function(list){
+          var newArrayData = [];
+          newArrayData = Array.isArray(_lists) ? _lists.slice() : Object.values(_lists);
+          this.items = newArrayData.map(function(list){
             list.items = Object.keys(list.items).map(function(key) {
               list.items[key].itemKey = key;
                 return list.items[key];
@@ -210,29 +295,54 @@
             userId: window.app.user.uid
           }
           this.$.newList.saveValue(this.$.newList.path).then(function(resp) {
-            this.items = this.listData.slice();
-            this._updateLists();
+            var tempList = this.listData;
+            var indx = tempList.map(item => item.items).indexOf(0);
+            if (indx >= 0) tempList[indx].items = Array(0);
+            console.log('updating', tempList);
+
+            this.items = tempList.slice();
           }.bind(this));
           this.$.addBtn.classList.remove('shake-no');
           this.addingList = false;
         }
       }
-      _updateLists(event) {
-        if (event) {
-          
-          // this.listData = this.listData.slice();
-          // this.listData = event.detail.itemsArr;
-          this.items = 
-          console.log('updating', this.listData);
-          // console.log('updating', event.detail.itemsArr);
-          // this.notifyPath('listData');
-          // this.$.repeater.render();
-        }
+      showListMenu(e) {
+        var localTarget = Polymer.dom(e).localTarget;
+        if (localTarget) {
+          var listId = localTarget.closest('.item-container').id;
+          var selected = this.items.filter(list => list.$key === listId)[0];
+          this.editListId = listId;
+          this.editListName = selected.listName;
+          this.$.editListModal.open();
+        } 
+      }
+      updateListName(e) {
+        console.log('entered updateListName');
+        var listId = this.editListId;
+        var selectedIndx = this.items.map(list => list.$key).indexOf(listId);
+        this.items[selectedIndx].listName = this.$.listNameVal;
+        if (!Array.isArray(this.items))
+        var newArrayData = [];
+        newArrayData = Array.isArray(this.items) ? this.items.slice() : Object.values(this.items);
+        this.items = newArrayData.slice();
+        this.$.updateList.setStoredValue('shopLists/' + listId + '/listName', this.$.listNameVal.value).then(function() {
+          this.$.editListModal.close();
+        }.bind(this));
+      }
+      deleteList(e) {
+        console.log('entered deleteList');
+        var listId = this.editListId;
+        var selectedIndx = this.items.map(list => list.$key).indexOf(listId);
+        this.splice('items', selectedIndx, 1);
+        this.$.updateList.path = 'shopLists/' + listId;
+        this.$.updateList.destroy().then(function() {
+          this.$.editListModal.close();
+        }.bind(this));
       }
       checkItems(updatedList) {
         if (updatedList.base && updatedList.base.length
-            && updatedList.value && this.selectedList) {
-          console.log('LIST INSIDE: ', updatedList);
+            && updatedList.value) {
+          console.log('LISTS -> checkItems: ', updatedList);
           var test = updatedList.base.map(function(list, index){
             if (!Array.isArray(list.items)) {
               list.items = Object.keys(list.items).map(function(key) {
@@ -240,17 +350,11 @@
                 return list.items[key];
               });
             }
-            // debugger;
-            // this.splice('items', index, 1, list);  
-            this.items = this.items.slice();    
-            Polymer.dom.flush();    
             return list;
           }.bind(this));
-          // this.items = test;
-          console.log('test: ', test);
-          
-            this.items = test;
-          // debugger;
+          var newArrayData = [];
+          newArrayData = Array.isArray(this.items) ? this.items.slice() : Object.values(this.items);
+          this.items = newArrayData.slice();
         }
       }
     }
