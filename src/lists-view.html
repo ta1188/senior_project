@@ -353,6 +353,8 @@
             }
             return list;
           }.bind(this));
+          if (!this.selectedList) this.selectedList = { $key: this.editListId };
+
           var index = this.items.map(list => list.$key).indexOf(this.selectedList.$key);
           
           this.notifyPath('items.' + index + '.listName');
