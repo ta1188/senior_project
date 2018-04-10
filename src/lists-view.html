@@ -240,10 +240,6 @@
         };
       }
 
-      connectedCallback() {
-        super.connectedCallback();
-        window.app = this;
-      }
       static get observers() {
         return [
           'checkItems(listData.*)'

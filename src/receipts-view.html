@@ -74,6 +74,11 @@
           },
         };
       }
+      static get observers() {
+        return [
+          'checkReceipt(receiptData.*)'
+        ]
+      }
       checkUser(_user) {
         if (_user) {
           console.log('uid: ', window.app.user.uid);
@@ -82,9 +87,9 @@
         }
       }
       checkReceipt(_receipt) {
-        if (window.app && window.app.user && window.app.user.uid && _receipt) {
+        if (window.app && window.app.user && _receipt && _receipt.base && _receipt.base.length) {
           console.log('receipt: ', _receipt);
-          this.items = _receipt.map(function(item) {
+          this.items = _receipt.base.map(function(item) {
             item.date = new Date(item.date).toLocaleString('en-US', {month: 'short', day: 'numeric'});
             return item;
           });
