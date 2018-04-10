@@ -82,12 +82,14 @@
         }
       }
       checkReceipt(_receipt) {
-        if (window.app.user.uid && _receipt) {
+        if (window.app && window.app.user && window.app.user.uid && _receipt) {
           console.log('receipt: ', _receipt);
           this.items = _receipt.map(function(item) {
             item.date = new Date(item.date).toLocaleString('en-US', {month: 'short', day: 'numeric'});
             return item;
           });
+          this.notifyPath('items');
+          this.notifyPath('items.*');
         }
       }
       _viewReceipt(e) {

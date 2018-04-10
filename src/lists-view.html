@@ -165,7 +165,7 @@
                     data="{{listData}}"></firebase-query>
     <firebase-document id="newList" path="/shopLists/" data="{{newListData}}"></firebase-document>
     <firebase-document id="updateList" path="" data="{{updateListData}}"></firebase-document>
-    <template id="repeater" is="dom-repeat" items="[[items]]" restamp>
+    <template id="repeater" is="dom-repeat" items="[[items]]">
       <div class="flex-row">
         <div id="[[item.$key]]" class="item-container flex-row wide">
           <div class="flex-row wide" on-click="_viewList">
@@ -217,7 +217,8 @@
           },
           selectedList: {
             type: Object,
-            notify: true
+            notify: true,
+            observer: "checkList"
           },
           user: {
             type: Object,
@@ -231,10 +232,18 @@
           editListId: String,
           editListName: String,
           listName: String,
-          items: Array          
+          selectedIndx: Number,
+          items: {
+            type: Array,
+            value: function(){ return []; }
+          }
         };
       }
 
+      connectedCallback() {
+        super.connectedCallback();
+        window.app = this;
+      }
       static get observers() {
         return [
           'checkItems(listData.*)'
@@ -265,6 +274,7 @@
         var localTarget = Polymer.dom(e).localTarget;
         if (localTarget) {
           var listId = localTarget.closest('.item-container').id;
+          this.selectedListIndx = this.items.map(list => list.$key).indexOf(listId);
           this.selectedList = this.items.filter(list => list.$key === listId)[0];
           if (this.listName !== this.selectedList.listName) {
             this.listName = this.selectedList.listName;
@@ -301,6 +311,8 @@
             console.log('updating', tempList);
 
             this.items = tempList.slice();
+            this.notifyPath('items');
+            this.notifyPath('items.*');
           }.bind(this));
           this.$.addBtn.classList.remove('shake-no');
           this.addingList = false;
@@ -317,15 +329,13 @@
         } 
       }
       updateListName(e) {
-        console.log('entered updateListName');
+        var listName = this.$.listNameVal.value;
         var listId = this.editListId;
-        var selectedIndx = this.items.map(list => list.$key).indexOf(listId);
-        this.items[selectedIndx].listName = this.$.listNameVal;
-        if (!Array.isArray(this.items))
-        var newArrayData = [];
-        newArrayData = Array.isArray(this.items) ? this.items.slice() : Object.values(this.items);
-        this.items = newArrayData.slice();
-        this.$.updateList.setStoredValue('shopLists/' + listId + '/listName', this.$.listNameVal.value).then(function() {
+        this.$.listNameVal.value = '';
+        this.selectedListIndx = this.items.map(list => list.$key).indexOf(listId);
+
+        var url = 'shopLists/' + listId + '/listName';
+        this.$.updateList.setStoredValue(url, listName).then(function() {
           this.$.editListModal.close();
         }.bind(this));
       }
@@ -341,9 +351,9 @@
       }
       checkItems(updatedList) {
         if (updatedList.base && updatedList.base.length
-            && updatedList.value) {
+            && updatedList.value && (this.selectedListIndx >= 0)) {
           console.log('LISTS -> checkItems: ', updatedList);
-          var test = updatedList.base.map(function(list, index){
+          this.items = updatedList.base.map(function(list){
             if (!Array.isArray(list.items)) {
               list.items = Object.keys(list.items).map(function(key) {
               list.items[key].itemKey = key;
@@ -352,9 +362,10 @@
             }
             return list;
           }.bind(this));
-          var newArrayData = [];
-          newArrayData = Array.isArray(this.items) ? this.items.slice() : Object.values(this.items);
-          this.items = newArrayData.slice();
+          var index = this.items.map(list => list.$key).indexOf(this.selectedList.$key);
+          
+          this.notifyPath('items.' + index + '.listName');
+          this.notifyPath('items.' + index + '.items.length');
         }
       }
     }

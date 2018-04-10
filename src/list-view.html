@@ -172,7 +172,10 @@
                 itemLabel: this.$.itemInput.value,
                 itemKey: result.key
               });
-              this.items = this.items.slice();
+              this.notifyPath('items');
+              this.selectedList.items = this.items;
+              this.selectedList = Object.assign(this.selectedList);
+              this.notifyPath('selectedList');
               this.$.itemInput.value = '';
               this.emmitLength();
             }.bind(this));
@@ -204,6 +207,7 @@
             var removalIndex = this.items.findIndex(item => item.itemKey === _itemId);
             this.splice('items', removalIndex, 1);
             this.selectedList = Object.assign(this.selectedList);
+            this.notifyPath('selectedList');
             var box;
             // Having to add this code to do something that
             // Polymer should have been able to do already...
