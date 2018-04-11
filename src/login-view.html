@@ -40,10 +40,10 @@
         position: absolute;
       }
       .emailImg {
-        top: 64px;
+        top: 110px;
       }
       .passwordImg {
-        top: 108px;
+        top: 155px;
       }
       ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
         color: #fff;
@@ -151,39 +151,52 @@
         text-align: center;
         border-radius: 5px;
       }
+      .welcome {
+        color: #FFFFFF;
+        text-shadow: 0px 3px 4px rgba(0, 0, 0, 0.25);
+        justify-content: center;
+        align-items: center;
+      }
+      .welcome span {
+        font-size: 16pt;
+        font-weight: bold;
+        margin: 30px 0;
+      }
     </style>
     <firebase-auth id="auth" user="{{user}}" signed-in="{{signedIn}}" provider="google" on-error="handleError"></firebase-auth>
     <firebase-document id="users" path="/users/" data="{{userData}}"></firebase-document>
     <div class="welcome-card">
-        <h2>Welcome!</h2>
-        <div class="inputs">
-          <img class="emailImg" src="../assets/email_24px.svg" alt="Email" />
-          <input id="email" type="text" placeholder="Email">
-          <img class="passwordImg" src="../assets/lock_24px.svg" alt="Password" hidden="[[resetPassword]]" />
-          <input id="password" type="password" placeholder="Password" hidden="[[resetPassword]]">
-          
-          <button hidden="[[!isNew]]" class="login-button submit-btn" on-click="registerNew">Register</button>
-          <button hidden="[[!showLoginBtn]]" class="login-button submit-btn" on-click="traditionalSignIn">Login</button>
-          <button hidden="[[!resetPassword]]" class="login-button submit-btn" on-click="sendPasswordReset">Send Reset Email</button>
-          <div hidden="[[hideErr]]" class="errMsg">
-            <span>[[errMsg]]</span>
-          </div>
+      <div class="flex-row welcome">
+        <span>Welcome to MobileChkout</span>
+      </div>
+      <div class="inputs">
+        <img class="emailImg" src="../assets/email_24px.svg" alt="Email" />
+        <input id="email" type="text" placeholder="Email">
+        <img class="passwordImg" src="../assets/lock_24px.svg" alt="Password" hidden="[[resetPassword]]" />
+        <input id="password" type="password" placeholder="Password" hidden="[[resetPassword]]">
+        
+        <button hidden="[[!isNew]]" class="login-button submit-btn" on-click="registerNew">Register</button>
+        <button hidden="[[!showLoginBtn]]" class="login-button submit-btn" on-click="traditionalSignIn">Login</button>
+        <button hidden="[[!resetPassword]]" class="login-button submit-btn" on-click="sendPasswordReset">Send Reset Email</button>
+        <div hidden="[[hideErr]]" class="errMsg">
+          <span>[[errMsg]]</span>
         </div>
+      </div>
 
-        <hr class="hr-text" data-content="Or Connect With" />
-        <div class="social-btns flex-row">
-            <button class="login-button google-btn" on-click="googleSignIn"><img src="../assets/google_icon.svg" alt="Account" /> <span>Google</span></button>
-            <button class="login-button facebook-btn" on-click="facebookSignIn"><img src="../assets/facebook_icon.svg" alt="Account" /> <span>Facebook</span></button>
+      <hr class="hr-text" data-content="Or Connect With" />
+      <div class="social-btns flex-row">
+          <button class="login-button google-btn" on-click="googleSignIn"><img src="../assets/google_icon.svg" alt="Account" /> <span>Google</span></button>
+          <button class="login-button facebook-btn" on-click="facebookSignIn"><img src="../assets/facebook_icon.svg" alt="Account" /> <span>Facebook</span></button>
+      </div>
+      <div class="bottom-text">
+        <div hidden="[[!isNew]]" class="loginText">
+            <span on-click="loginSwitch">Have an Account? Login</span>
         </div>
-        <div class="bottom-text">
-          <div hidden="[[!isNew]]" class="loginText">
-              <span on-click="loginSwitch">Have an Account? Login</span>
-          </div>
-          <div class="bottom-text flex-row" hidden="[[isNew]]">
-              <span on-click="resetSwitch">Forgot password?</span>
-              <span on-click="signUp">New here? Sign Up</span>
-          </div>
+        <div class="bottom-text flex-row" hidden="[[isNew]]">
+            <span on-click="resetSwitch">Forgot password?</span>
+            <span on-click="signUp">New here? Sign Up</span>
         </div>
+      </div>
     </div>
   </template>
 
@@ -296,7 +309,7 @@
         this.isNew = false;
       }
       sendPasswordReset() {
-        debugger;
+        // debugger;
         var userEmail = window.app.user.email;
         if (!this.$.email.value && !userEmail) {
           this.errMsg = "Invalid Email";
@@ -359,7 +372,7 @@
         }
       }
       storeUser(resp) {
-        debugger;
+        // debugger;
         this.userData = { email: resp.email };
         this.$.users.saveValue(this.$.users.path, resp.uid);
       }
