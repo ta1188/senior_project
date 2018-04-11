@@ -230,11 +230,9 @@
       renderCheckout(e) {
         if (!e && !e.detail) return;
         this.cartInfo = e.detail;
-        console.log('checkout Detail', e.detail);
         this.total = parseFloat(e.detail.total);
       }
       checkCardInfo(e) {
-        console.log('billing info: ', e);
         if (e.base && e.base.length) {
           var tempArr = [];
           e.base.forEach(function(card){
