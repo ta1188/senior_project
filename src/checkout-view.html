@@ -234,10 +234,8 @@
         this.total = parseFloat(e.detail.total);
       }
       checkCardInfo(e) {
-        debugger
         console.log('billing info: ', e);
         if (e.base && e.base.length) {
-          debugger;
           var tempArr = [];
           e.base.forEach(function(card){
             tempArr.push({
