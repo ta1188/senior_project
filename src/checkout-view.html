@@ -199,7 +199,11 @@
           receiptData: Object,
           total: Array,
           total: Number,
-          uid: String
+          uid: String,
+          user: {
+            type: Object,
+            observer: "checkUser"
+          },
         };
       }
       static get observers() {
@@ -218,6 +222,11 @@
       disconnectedCallback () {
         window.removeEventListener('checkingOut', this.renderCheckout.bind(this));
       }
+      checkUser(_user) {
+        if (_user) {
+          this.uid = _user.uid;
+        }
+      }
       renderCheckout(e) {
         if (!e && !e.detail) return;
         this.cartInfo = e.detail;
@@ -225,8 +234,10 @@
         this.total = parseFloat(e.detail.total);
       }
       checkCardInfo(e) {
+        debugger
         console.log('billing info: ', e);
         if (e.base && e.base.length) {
+          debugger;
           var tempArr = [];
           e.base.forEach(function(card){
             tempArr.push({
