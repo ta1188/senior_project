@@ -157,6 +157,12 @@
       .font-size {
         font-size: 10pt;
       }
+      .cancel-btn {
+        outline: none;
+        background-color: transparent;
+        color: #1976d2;
+        border: none;
+      }
     </style>
     <firebase-query id="lists" 
                     path="/shopLists" 
@@ -201,7 +207,7 @@
       </div>
       <div class="flex-row margin-top">
         <button class="delete-btn" on-click="deleteList">Delete List</button>
-        <button class='font-size' dialog-dismiss>Cancel</button>
+        <button class='font-size cancel-btn' dialog-dismiss>Cancel</button>
       </div>
     </paper-dialog>
   </template>
