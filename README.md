@@ -8,10 +8,14 @@
   
   [Checkout more about Polymer](https://www.polymer-project.org/)
 
- The backend uses Google Firebase's Firestore (NoSQL - document database). 
- > _Cloud Firestore is a flexible, scalable database for mobile, web, and server development from Firebase and Google Cloud Platform._
+ The backend uses Google Firebase (NoSQL - document database). 
+ > _Firebase is a flexible, scalable database for mobile, web, and server development from Firebase and Google Cloud Platform._
   
-  [Checkout more about Firestore](https://firebase.google.com/docs/firestore/)
+  [Checkout more about Firebase](https://firebase.google.com/)
+  
+  This app uses GPS (via the built-in geolocation API) to track user position.
+  
+  It also accesses the user's camera in order to scan barcodes using the [Quagga.js library](https://serratus.github.io/quaggaJS/)
 
 ## Approach 
  The ECMAScript2015 (ES6) features are used heavily throughout the application.
