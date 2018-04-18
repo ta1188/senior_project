@@ -51,13 +51,13 @@
       }
       connectedCallback () {
         super.connectedCallback();
-        if (!window.Quagga) console.log('Quagga unknown');
+        if (!window.Quagga) console.error('Quagga is undefined');
       }
       disconnectedCallback () {
         // measure something
       }
       test(_active) {
-        if (!window.Quagga) return console.log('no quagga...'); 
+        if (!window.Quagga) return console.error('Quagga is not available on window'); 
         if (this.active) {
           this.initQuagga();
         } else {
@@ -154,7 +154,6 @@
                     code: result.codeResult.code, 
                     format: result.codeResult.format
                   });
-                  // window.dispatchEvent(new CustomEvent('scannedUpdated', {bubbles: true, composed: true}));
                   window.history.pushState({}, null, 'cart');
                   window.dispatchEvent(new CustomEvent ('location-changed'));
                 }

@@ -18,7 +18,6 @@
 <link rel="import" href="./list-view.html">
 <link rel="import" href="./billing-view.html">
 <link rel="import" href="./confirmation-view.html">
-<link rel="import" href="./four-oh-four-view.html">
 
 <dom-module id="home-view">
   <template>
@@ -209,8 +208,6 @@
           <receipt-view name="receipt" selected-receipt="{{selectedReceipt}}"></receipt-view>
           <billing-view name="billing"></billing-view>
           <confirmation-view name="confirmation"></confirmation-view>
-    
-          <four-oh-four-view name="four-oh-four"></four-oh-four-view>
         </iron-pages>
       </div>
 
@@ -372,12 +369,6 @@
         if (!route.path) return;
         var page = route.path;
         if (page.substr()[0] === '/') page = page.substr(1); 
-        // var test = route.path.split('/').filter(String);
-        // if(test.length > 1 && test[0] === 'list') {
-        //   // TODO: Fix this so you can leave the page to other routes...
-        //   this.page = test[0];
-        //   this.subpath = test[1];
-        // } else {
         if (page === 'lists') this.hideListsReturn = true;
         this.page = page;
       }
@@ -410,12 +401,7 @@
         if (page === 'confirmation') window.setBannerLabel('');
       }
 
-      _showPage404() {
-        this.page = 'four-oh-four';
-      }
-
       _hideOnLogin(_page) {
-        // debugger;
         return (_page === "login") ? 'hide' : '';
       }
       _isLogin(_page) {

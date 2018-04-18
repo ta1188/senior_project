@@ -157,7 +157,7 @@
         this.$.inputContainer.classList.remove('focused');
       }
       addItem() {
-        console.log('adding item, key:', this.selectedList.$key);
+        // console.log('adding item, key:', this.selectedList.$key);
         this.hideInputAdd = true;
 
         this.listData = { itemLabel: this.$.itemInput.value };
@@ -173,7 +173,6 @@
               this.selectedList = Object.assign(this.selectedList);
               this.notifyPath('selectedList');
               this.$.itemInput.value = '';
-              this.emmitLength();
             }.bind(this));
         }.bind(this));
       }
@@ -216,7 +215,6 @@
               box.disabled = false;
               box.classList.remove('striked');
             }
-            this.emmitLength();
           }.bind(this));
         } else {
           _localTarget.classList.remove('striked');
@@ -224,10 +222,6 @@
           _localTarget.disabled = false;
           this.saveItem = false;
         }
-      }
-      emmitLength() {
-        // console.log('this.listItemsData.length', this.listItemsData.length);
-        // window.dispatchEvent(new CustomEvent('listLength', {bubbles: true, composed: true, detail: {length: this.listItemsData.length, itemsArr: this.listItemsData}}));
       }
     }
 

@@ -159,9 +159,7 @@
             zipCode: this.$.zipCode.value,
             userId: app.user.uid
           }
-          console.log('cardData: ', this.cardData);
           this.$.card.saveValue('tempCardInfo').then(function(resp){
-            console.log('saved it');
             window.setToast('Successfully added card');
             this.$.cardType.selectedItemLabel = '';
             this.$.cardHolder.value = '';
@@ -175,7 +173,7 @@
             window.dispatchEvent(new CustomEvent ('location-changed'));
           }.bind(this)).catch(function(err) {
             window.setToast('Problem adding card');
-            console.log('error saving', err);
+            console.error('error saving', err);
           });
         }
       }

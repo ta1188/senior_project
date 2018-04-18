@@ -89,7 +89,6 @@
         position: relative;
         top: 5px;
       }
-      /* HTML5 Boilerplate accessible hidden styles */
       [type="radio"] {
         border: 0; 
         clip: rect(0 0 0 0); 
@@ -100,11 +99,9 @@
         width: 1px;
       }
 
-      /* One radio button per line */
       label {
         display: block;
         cursor: pointer;
-        
       }
 
       [type="radio"] + span {
@@ -131,7 +128,6 @@
         box-shadow: 0 0 0 3px #979797;
       }
 
-      /* never forget focus styling */
       [type="radio"]:focus + span {
         background-color: transparent;
       }
@@ -215,7 +211,7 @@
         super.connectedCallback();
         window.addEventListener('checkingOut', this.renderCheckout.bind(this));
         if (window.app.user.uid) {
-          console.log('uid: ', window.app.user.uid);
+          // console.log('uid: ', window.app.user.uid);
           this.uid = window.app.user.uid;
         }
       }
@@ -248,7 +244,6 @@
       }
       addBillingInfo() {
         // TODO: Have redirect back to checkout screen...
-
         window.history.pushState({}, null, 'billing');
         window.dispatchEvent(new CustomEvent ('location-changed'));
       }

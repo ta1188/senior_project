@@ -181,8 +181,13 @@
         }
       }
       removeItem(e) {
-        var targetEl = Polymer.dom(e).rootTarget;
-        this.items = this.items.filter(item => item.code !== targetEl.closest('div').dataset.code);
+        let targetEl = Polymer.dom(e).rootTarget;
+        let elCode = targetEl.closest('div').dataset.code;
+        let elIndex = this.items.map(item => item.code).indexOf(elCode);
+
+        this.items = this.items.splice(elIndex, 1);
+        this.notifyPath('items');
+        this.notifyPath('items.*');
         
         if (this.items.length) {
           this.subTotal -= 2.14;

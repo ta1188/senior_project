@@ -199,7 +199,6 @@
       }
       checkUser(_user) {
         if (_user) {
-          // console.log('uid: ', window.app.user.uid);
           this.uid = _user.uid;
           this.userEmail = _user.email;
           this.userName = _user.displayName || '';
@@ -232,8 +231,8 @@
                 this.addingName = false;
               }.bind(this));
             }.bind(this)).catch(function(error) {
-              console.error('error', error);
               // An error happened.
+              console.error('error', error);
             });        
           
         }
@@ -289,13 +288,6 @@
         // To bypass this you have to set the `composed` flag to true
         window.dispatchEvent(new CustomEvent('logout', {bubbles: true, composed: true}));
       }
-      // _hideInputs(e) {
-      //   debugger;
-      //   if (e.target.id != "addNameBtn" || e.target.id != "addEmailBtn") {
-      //     this.addingEmail = false;
-      //     this.addingName = false;
-      //   }
-      // }
     }
 
     window.customElements.define(AccountView.is, AccountView);
