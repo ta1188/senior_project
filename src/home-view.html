@@ -176,7 +176,6 @@
     <app-route route="{{route}}" pattern="/receipt"></app-route>
     <app-route route="{{route}}" pattern="/billing"></app-route>
     <app-route route="{{route}}" pattern="/confirmation"></app-route>
-    <!-- <app-route route="{{route}}" pattern="/four-oh-four"></app-route> -->
 
       <div id="bannerLabel" class$="nav-bar header-nav [[_hideOnLogin(page)]]">
         <a hidden="[[hideListsReturn]]" href="[[returnPath]]" class="bannerLink">
@@ -195,7 +194,6 @@
       </div> 
       <div id="mainContent" class$="main-content [[_isLogin(page)]]">
         <!-- iron-pages selects the view based on the active route -->
-        <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="four-oh-four">
           <login-view name="login" user="{{user}}"></login-view>
           <account-view name="account" user="{{user}}"></account-view>
           <cart-view name="cart" scanned-items="{{scannedItems}}"></cart-view>
