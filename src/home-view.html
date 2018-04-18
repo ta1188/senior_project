@@ -194,6 +194,7 @@
       </div> 
       <div id="mainContent" class$="main-content [[_isLogin(page)]]">
         <!-- iron-pages selects the view based on the active route -->
+        <iron-pages selected="[[page]]" attr-for-selected="name">
           <login-view name="login" user="{{user}}"></login-view>
           <account-view name="account" user="{{user}}"></account-view>
           <cart-view name="cart" scanned-items="{{scannedItems}}"></cart-view>
