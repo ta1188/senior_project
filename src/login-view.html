@@ -309,7 +309,6 @@
         this.isNew = false;
       }
       sendPasswordReset() {
-        // debugger;
         var userEmail = window.app.user.email;
         if (!this.$.email.value && !userEmail) {
           this.errMsg = "Invalid Email";
@@ -348,8 +347,7 @@
           this.hideErr = true;
         }.bind(this),delay);
       }
-      checkSigin(test) {
-        // console.log('signedIn status:', this.signedIn);
+      checkSigin(_signedIn) {
         if (!window.app) window.app = { user: {} }; 
         if (this.user) window.app.user = this.user;
 
@@ -372,7 +370,6 @@
         }
       }
       storeUser(resp) {
-        // debugger;
         this.userData = { email: resp.email };
         this.$.users.saveValue(this.$.users.path, resp.uid);
       }
