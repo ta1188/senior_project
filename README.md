@@ -18,6 +18,6 @@
   It also accesses the user's camera in order to scan barcodes using the [Quagga.js library](https://serratus.github.io/quaggaJS/)
 
 ## Approach 
- The ECMAScript2015 (ES6) features are used heavily throughout the application.
+ The ECMAScript2015 (ES6) features are used throughout the application.
 
  Using the built in functionality of the browsers has been the focus throughout this project
